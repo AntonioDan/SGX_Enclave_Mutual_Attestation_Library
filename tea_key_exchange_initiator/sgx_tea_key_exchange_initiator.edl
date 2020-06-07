@@ -1,0 +1,25 @@
+enclave {
+    include "sgx_trts.h"
+    include "sgx_tcrypto.h"
+    include "sgx_report.h"
+
+    include "sgx_ea.h"
+    include "sgx_ea_error.h"
+
+    trusted {
+        //public sgx_ea_status_t sgx_ea_init(sgx_ea_role_t role);
+
+        public sgx_ea_status_t sgx_ea_initiator_init_session(sgx_ea_session_id_t sessionid);
+        
+        public sgx_ea_status_t sgx_ea_initiator_gen_msg2_content([in, count = 1]sgx_tea_msg1_content_t * p_msg1content, [in, count = 1]sgx_target_info_t * p_qe_target, [out, count = 1] sgx_tea_msg2_content_t* msg2content);
+
+        public sgx_ea_status_t sgx_ea_initiator_proc_msg3_content([in, count = 1]sgx_tea_msg3_content_t *msg3);
+
+        public sgx_ea_status_t sgx_ea_initiator_get_mk([out, count = 1]sgx_aes_gcm_128bit_key_t * key);       
+
+        public sgx_ea_status_t sgx_tea_initiator_get_sec_msg_size(uint32_t rawmsgsize, [out, count = 1]uint32_t *p_secmsgsize);
+
+        public sgx_ea_status_t sgx_tea_initiator_encrypt_msg([user_check]const uint8_t * p_rawmsgbuf, uint32_t rawmsgsize,
+                                                [user_check]uint8_t * p_secmsgbuf, uint32_t secmsgsize);
+    };
+};

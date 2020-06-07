@@ -1,0 +1,6 @@
+enclave {
+    include "sgx_trts.h"
+    include "sgx_quote.h"
+    from "sgx_tea_key_exchange_responder.edl" import *;
+    from "sgx_tqvl.edl" import *;
+};

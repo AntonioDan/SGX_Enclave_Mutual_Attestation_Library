@@ -1,0 +1,20 @@
+enclave {
+    include "sgx_ea.h"
+    include "sgx_report.h"
+    include "sgx_quote.h"
+    include "time.h"
+
+    trusted {
+        public sgx_ea_status_t sgx_tea_get_qve_report_info([out, count=1]sgx_qe_report_info_t *p_qe_report_info);
+        public sgx_ea_status_t sgx_ea_verify_qve_result(time_t expiration_time, uint32_t collateral_expiration_status, uint32_t quote_verification_result,
+				[in, count=1]sgx_quote_nonce_t * p_nonce, [user_check]const uint8_t * p_quote, uint32_t quote_size, [in, count=1]sgx_report_t * qve_report, [user_check]uint8_t * supplemental_data, uint32_t supplemental_data_size);
+        
+        public sgx_ea_status_t sgx_tea_get_qe_report_info([out, count=1]sgx_qe_report_info_t *p_qe_report_info);
+        public sgx_ea_status_t sgx_tea_get_qe_report_info_withidx(uint32_t id, [out, count=1]sgx_qe_report_info_t * report_info);
+
+        public sgx_ea_status_t sgx_tea_verify_qe_report_adv([in, count=1]sgx_report_t * qe_report, [in, size=16]uint8_t * nonce, 
+                                                           [user_check]const uint8_t * quote, uint32_t quote_size, sgx_isv_svn_t latest_qe_isvsvn);
+        public sgx_ea_status_t sgx_tea_verify_qe_report_adv_withidx(uint32_t sid, [in, count=1]sgx_report_t * qe_report, [in, size=16]uint8_t * nonce, 
+                                                           [user_check]const uint8_t * quote, uint32_t quote_size, sgx_isv_svn_t latest_qe_isvsvn);
+    };    
+};
