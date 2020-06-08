@@ -103,6 +103,21 @@ sgx_ea_status_t sgx_uea_initiator_query_server_session_key();
  **/ 
 sgx_ea_status_t sgx_uea_initiator_sendmsg(const uint8_t * p_sentmsg, uint32_t sentmsgsize);
 
+/**
+ *  This function tries to receive message from responder. 
+ * 
+ *  @param pp_recvmsg - this points to received message from responder. 
+ *  Note: this output message has been decrypted and processed by initiator enclave (libenclaveinitiator.so), which just decrypt the message with session sealing key to get the plain text. If you want to implement your data process logic, you need to modify enclaveinitiator project yourself.
+ *  @param p_msgsize - this points to the message size 
+ * 
+ *  @return Status of this operation, one of below values:
+ *      - SGX_EA_SUCCESS
+ *      - SGX_EA_ERROR_INVALID_PARAMETER
+ *      - SGX_EA_ERROR_NETWORK
+ *      - SGX_EA_ERROR_UNEXPECTED  
+ **/ 
+sgx_ea_status_t sgx_uea_initiator_recvmsg(uint8_t **pp_msg, uint32_t *p_msgsize);
+
 #ifdef __cplusplus
 }
 #endif

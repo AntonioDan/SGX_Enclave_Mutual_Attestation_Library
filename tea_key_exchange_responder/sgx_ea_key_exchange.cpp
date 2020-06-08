@@ -11,30 +11,8 @@
 
 #include <vector>
 
-/*typedef struct sgx_ea_context {
-    sgx_ea_session_status_t status;
-    sgx_ea_role_t role;
-    sgx_target_info_t qe_target;
-    sgx_ea_session_id_t sessionid;
-    sgx_ec256_public_t ecpubkey;
-    sgx_ec256_private_t ecprivkey;
-    sgx_ec256_dh_shared_t ecsharedkey;
-    sgx_aes_gcm_128bit_key_t sk;
-    sgx_aes_gcm_128bit_key_t mk;
-    sgx_quote_nonce_t nonce_for_qe; // this is used to generate ECDSA Quote
-} sgx_ea_context_t;*/
-
 static sgx_spinlock_t m_ea_db_lock = SGX_SPINLOCK_INITIALIZER;
 static std::vector<sgx_ea_context_t *> m_ea_responder_ctx_vec;
-
-/*
-const sgx_measurement_t m_qe_mrsigner = {
-    {0x8C, 0x4F, 0x57, 0x75, 0xD7, 0x96, 0x50, 0x3E, 
-     0x96, 0x13, 0x7F, 0x77, 0xC6, 0x8A, 0x82, 0x9A,
-     0x00, 0x56, 0xAC, 0x8D, 0xED, 0x70, 0x14, 0x0B,
-     0x08, 0x1B, 0x09, 0x44, 0x90, 0xC5, 0x7B, 0xFF}
-};
-*/
 
 static sgx_ea_session_id_t gen_session_id()
 {

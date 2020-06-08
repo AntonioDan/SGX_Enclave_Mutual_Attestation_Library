@@ -3,7 +3,6 @@
 
 #include "sgx_ea.h"
 #include "CEAInitiator.h"
-//#include "parseconfig.h"
 #include "CEAException.h"
 #include "CEAServiceTranslator.h"
 #include "CEAServiceProvider.h"
@@ -21,8 +20,7 @@ class CEAInitiatorctx {
                         std::shared_ptr<CSGXECDSAQuoteVerifier> quote_verifier, std::shared_ptr<CEAQEIdentity> qeidentity);
         ~CEAInitiatorctx();
 
-    public:
-        //static CEAInitiatorctx * GetInstance();
+    public:        
         void init();
 
         sgx_ea_status_t create_ea_session();
@@ -31,6 +29,7 @@ class CEAInitiatorctx {
         sgx_ea_status_t get_initiator_key(sgx_aes_gcm_128bit_key_t * key);
         sgx_ea_status_t get_responder_key();
         sgx_ea_status_t send_message(const uint8_t * p_msg, uint32_t size);
+        sgx_ea_status_t recv_message(uint8_t **pp_msg, uint32_t *p_msgsize);
 
     public:
         sgx_ea_status_t init_qe_identity(const string& qeidentity);
@@ -44,11 +43,8 @@ class CEAInitiatorctx {
         std::shared_ptr<CEAServiceTranslator> m_translator;
         std::shared_ptr<CSGXECDSAQuote> m_quote;
         std::shared_ptr<CSGXECDSAQuoteVerifier> m_p_quote_verifier;
-        std::shared_ptr<CEAQEIdentity> m_p_qeidentity;
-        //sgx_ea_server_t m_server;
-        sgx_ea_session_id_t m_sid;
-
-        //static CEAInitiatorctx * m_instance;
+        std::shared_ptr<CEAQEIdentity> m_p_qeidentity;        
+        sgx_ea_session_id_t m_sid;        
 
     private:
         CEAInitiatorctx(const CEAInitiatorctx&);

@@ -19,7 +19,29 @@ enclave {
 
         public sgx_ea_status_t sgx_tea_initiator_get_sec_msg_size(uint32_t rawmsgsize, [out, count = 1]uint32_t *p_secmsgsize);
 
+        /**
+         * This function takes raw message input {p_rawmsgbuf, rawmsgsize}, encrypte the message with AES-128-GCM using session sealing key and output the encrypted text {p_secmsgbuf, secmsgsize}.
+         * 
+         * @param p_secmsgbuf - this points to output encrypted message buffer, the data format is sgx_tea_sec_msg_t, see sgx_ea.h
+         **/
         public sgx_ea_status_t sgx_tea_initiator_encrypt_msg([user_check]const uint8_t * p_rawmsgbuf, uint32_t rawmsgsize,
                                                 [user_check]uint8_t * p_secmsgbuf, uint32_t secmsgsize);
+
+        /**
+         * This function returns plaintext size for the encrypted message. The encrypted message format is sgx_tea_sec_msg_t, see sgx_ea.h
+         * @param encrypted_msg - this points to encrypted message buffer.
+         * @param encrypted_msg_size - this is encrypted message size.
+         **/
+        public sgx_ea_status_t sgx_tea_initiator_get_decrypted_msg_size([user_check]const uint8_t * encrypted_msg, uint32_t encrypted_msg_size, [out, count=1]uint32_t * p_decrypted_msg_size);
+
+        /**
+         * This function decrypts message {encrypted_msg, encrypted_msg_size} and return the raw message.
+         * @param encrypted_msg - this points to the encrypted message buffer, the message format is sgx_tea_sec_msg_t, see sgx_ea.h
+         * @param encrypted_msg_size - this is encrypted message size.
+         * @param p_decrypted_msg - this points to the output decrypted message buffer, the output message is raw data format.
+         * @param decrypted_msg_size - this is decrytped message size 
+         **/
+        public sgx_ea_status_t sgx_tea_initiator_decrypt_msg([user_check]const uint8_t * encrypted_msg, uint32_t encrypted_msg_size,
+                                               [user_check]uint8_t * p_decrypted_msg, uint32_t decrypted_msg_size);
     };
 };

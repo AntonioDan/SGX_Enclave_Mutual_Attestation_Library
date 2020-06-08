@@ -169,3 +169,25 @@ sgx_ea_status_t sgx_uea_initiator_sendmsg(const uint8_t * p_sentmsg, uint32_t se
         return SGX_EA_ERROR_UNEXPECTED;
     }
 }
+
+sgx_ea_status_t sgx_uea_initiator_recvmsg(uint8_t ** pp_recvmsg, uint32_t * p_msgsize)
+{
+    if (!pp_recvmsg || !p_msgsize)
+        return SGX_EA_ERROR_INVALID_PARAMETER;
+
+    if (!m_initiator)
+        return SGX_EA_ERROR_UNINITIALIZED;
+
+    try
+    {        
+        return m_initiator->recv_message(pp_recvmsg, p_msgsize);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+        return SGX_EA_ERROR_UNEXPECTED;        
+    }
+    
+
+    return SGX_EA_SUCCESS;
+}

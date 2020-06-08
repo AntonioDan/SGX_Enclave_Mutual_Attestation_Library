@@ -23,8 +23,50 @@ class CEAInitiator {
         sgx_ea_status_t get_sec_msg_size(uint32_t rawmsgsize, uint32_t *p_secmsgsize);
         sgx_ea_status_t encrypt_msg(const uint8_t *p_rawmsg, uint32_t rawmsgsize,
                                     uint8_t * p_encrypted_msg, uint32_t encrypted_msg_size);
+        
+        /**
+         * This function wraps initiator enclave ECALL interface to encrypt the raw message input {p_rawmsg, rawmsgsize}.
+         * 
+         * @param p_rawmsg - this points to input message buffer
+         * @param rawmsgsize - this is input message size
+         * @param pp_secmsg - this points to output message buffer, the output message format is sgx_tea_sec_msg_t, see sgx_ea.h
+         * @param p_secmsgsize - this points to output message buffer size.
+         **/
         sgx_ea_status_t get_sec_msg(const uint8_t *p_rawmsg, uint32_t rawmsgsize,
                                             uint8_t **pp_secmsg, uint32_t *p_secmsgsize);
+
+        /**
+         * This function wraps initiator enclave ECALL interface to get plain message size.
+         * 
+         * @param encrypted_msg - this points to the input message buffer. The input message format is sgx_tea_sec_msg_t format, see sgx_ea.h
+         * @param encrypted_msg_size - this is input message size.
+         * @param p_decrypted_msg_size - this points to the output message buffer size.         * 
+         **/
+        sgx_ea_status_t get_plain_msg_size(const uint8_t * encrypted_msg, uint32_t encrypted_msg_size, uint32_t * p_decrypted_msg_size);
+
+        /**
+         * This function wraps initiator enclave ECALL interface to get plain message.
+         * 
+         * @param encrypted_msg - this points to the input message buffer. The input message format is sgx_tea_sec_msg_t format, see sgx_ea.h
+         * @param encrypted_msg_size - this is the input message size.
+         * @param p_decrypted_msg - this points to decrypted message buffer, it's raw data format. This buffer is allocated by caller.
+         * @param decrypted_msg_size - this is decrypted message size.         *  
+         **/
+        sgx_ea_status_t get_plain_msg(const uint8_t * encrypted_msg, uint32_t encrypted_msg_size,
+                                       uint8_t * p_decrypted_msg, uint32_t decrypted_msg_size);
+
+        /**
+         * This function wraps both ECALL interface to get plain message size and decrypt message.
+         * 
+         * @param encrypted_msg - this points to the input message buffer. The input message format is sgx_tea_sec_msg_t format, see sgx_ea.h
+         * @param encrypted_msg_size - this is the input message size.
+         * @param pp_decrypted_msg - this points to decrypted message buffer, it's raw data format. This function would allocate buffer according to plaintext message size, and return the plain message size to p_decrypted_msg_size buffer.
+         * @param p_decrypted_msg_size - this is decrypted message size.         *  
+         *
+         **/
+        sgx_ea_status_t get_plain_msg(const uint8_t * encrypted_msg, uint32_t encrypted_msg_size,
+                                       uint8_t ** pp_decrypted_msg, uint32_t * p_decrypted_msg_size);
+
         sgx_ea_status_t uninit();
 
     private:

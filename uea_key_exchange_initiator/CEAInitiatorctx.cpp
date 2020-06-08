@@ -330,12 +330,17 @@ sgx_ea_status_t CEAInitiatorctx::init_qe_identity(const string& qeidentity)
     return SGX_EA_SUCCESS;
 }
 
+/**
+ * This function takes raw message {p_msg, size} input and send it to responder through secure session.
+ * 
+ * @param p_msg - this points to the raw message to be sent
+ * @param size - the size of sent message
+ * 
+ * Note: this function would encrypt the raw message with session sealing key, wraps the decrypted message with sgx_ea_msg_sec_t format (see sgx_ea.h declaration) and send
+ * 
+ **/
 sgx_ea_status_t CEAInitiatorctx::send_message(const uint8_t * p_msg, uint32_t size)
-{
-    // do ecall to get secure buffer size
-    // allocate buffer
-    // do ecall to encrypt message
-    // call translator interface to serialize the message
+{    
     sgx_ea_status_t earet;
     uint8_t * p_sec_msg = NULL;
     uint32_t sec_msg_size;
@@ -371,4 +376,29 @@ sgx_ea_status_t CEAInitiatorctx::send_message(const uint8_t * p_msg, uint32_t si
     
     delete[] rawmsg;
     return SGX_EA_SUCCESS;
+}
+
+sgx_ea_status_t CEAInitiatorctx::recv_message(uint8_t **pp_msg, uint32_t *p_msgsize)
+{    
+    uint8_t * p_recvrawmsg = NULL;
+
+    // receive message from responder. This raw message follows format definition in sgx_ea.h and starts with sgx_ea_msg_header_t blob.
+    p_recvrawmsg = m_translator->recvMessage();
+    if (!p_recvrawmsg)
+        return SGX_EA_ERROR_NETWORK;
+
+    // check message header
+    sgx_ea_msg_header_t * msgheader = (sgx_ea_msg_header_t *)p_recvrawmsg;
+
+    if ((msgheader->version != SGX_EA_VERSION)
+        || (msgheader->type >= EA_MSG_UNKNOWN)
+        || (msgheader->size <= (uint32_t)sizeof(sgx_ea_msg_header_t) + (uint32_t)sizeof(sgx_ea_session_id_t)))
+        return SGX_EA_ERROR_MESSAGE_FORMAT;
+
+    // do ecall to decrypt the message
+    sgx_tea_sec_msg_t * p_sec_msg = (sgx_tea_sec_msg_t *)(p_recvrawmsg + 
+                                                        (uint32_t)sizeof(sgx_ea_msg_header_t) + (uint32_t)sizeof(sgx_ea_session_id_t));
+    uint32_t sec_msg_size = msgheader->size - (uint32_t)sizeof(sgx_ea_msg_header_t) - (uint32_t)sizeof(sgx_ea_session_id_t);
+    
+    return m_ea_initiator->get_plain_msg((uint8_t *)p_sec_msg, sec_msg_size, pp_msg, p_msgsize);    
 }

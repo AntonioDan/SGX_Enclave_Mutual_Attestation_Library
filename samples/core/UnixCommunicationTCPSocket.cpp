@@ -32,51 +32,24 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-//#include <sys/in.h>
 #include <stdlib.h>
 #include <errno.h>
-//#include <IAERequest.h>
-//#include <IAEResponse.h>
 #include <se_trace.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <UnixCommunicationTCPSocket.h>
 
-
 UnixCommunicationTCPSocket::UnixCommunicationTCPSocket(std::string ip, short port)
 :m_server_ip(ip), m_port(port), mWasTimeout(false), mTimeoutMseconds(0)
 {
-    memset(&mStartTime, 0, sizeof(struct timeval));
-
-    //doing all this manually to ensure <new> based memory allocation across the solution
-    //size_t size = strlen(socketbase) + 1;
-    //ensure a fairly decend size for socketbase is not overflowed
-    //if (size > 255)
-    //    return;     //a socketbase of more than 255 chars may break the system on connect
-
-    //mSocketBase = new char[size];
-    //memset(mSocketBase, 0, size);
-    //strncpy(mSocketBase, socketbase, size);
+    memset(&mStartTime, 0, sizeof(struct timeval));   
 
     mSocket = -1;
 }
 
-/*UnixCommunicationTCPSocket::UnixCommunicationTCPSocket(int socket)
-:mSocketBase(NULL), mWasTimeout(false), mTimeoutMseconds(0)
-{
-    mSocket = socket;
-
-    memset(&mStartTime, 0, sizeof(struct timeval));
-}*/
-
 UnixCommunicationTCPSocket::~UnixCommunicationTCPSocket()
 {
     disconnect();
-    /*if (mSocketBase != NULL)
-    {
-        delete [] mSocketBase;
-        mSocketBase = NULL;
-    }*/
 }
 
 void UnixCommunicationTCPSocket::disconnect()
@@ -186,8 +159,7 @@ char* UnixCommunicationTCPSocket::readRaw(size_t length)
         }
         //check connection closed by peer
         if (step <= 0 || CheckForTimeout())
-        {
-            //this connection is probably closed
+        {        
             disconnect();
             delete[] recBuf;
             recBuf = NULL;
@@ -200,10 +172,8 @@ char* UnixCommunicationTCPSocket::readRaw(size_t length)
     return recBuf;
 }
 
-//this will connect to the AESM by opening an Unix Socket
 bool UnixCommunicationTCPSocket::init()
 {
-    //init will always return directly with success if object was created with pre-existent socket
     if (mSocket == -1)
     {
         struct sockaddr_in serv_addr;

@@ -328,7 +328,6 @@ sgx_ea_status_t sgx_tea_initiator_encrypt_msg(const uint8_t * p_rawmsgbuf, uint3
 
     if (m_ea_initiator_ctx.status != SGX_EA_SESSION_ESTABLISHED)
         return SGX_EA_ERROR_UNINITIALIZED;
-
     
     sgx_tea_sec_msg_t * p_tea_sec_msg = (sgx_tea_sec_msg_t *)p_secmsgbuf;
 
@@ -344,4 +343,52 @@ sgx_ea_status_t sgx_tea_initiator_encrypt_msg(const uint8_t * p_rawmsgbuf, uint3
         return SGX_EA_ERROR_CRYPTO;
 
     return SGX_EA_SUCCESS;
+}
+
+sgx_ea_status_t sgx_tea_initiator_get_decrypted_msg_size(const uint8_t * encrypted_msg, uint32_t encrypted_msg_size, uint32_t * p_decrypted_msg_size)
+{
+    if (!encrypted_msg || !p_decrypted_msg_size || (encrypted_msg_size < sizeof(sgx_tea_sec_msg_t)))
+        return SGX_EA_ERROR_INVALID_PARAMETER;
+
+    if (sgx_is_within_enclave(encrypted_msg, encrypted_msg_size))
+        return SGX_EA_ERROR_INVALID_PARAMETER;
+
+    sgx_tea_sec_msg_t * p_sec_msg = (sgx_tea_sec_msg_t *)encrypted_msg;
+
+    *p_decrypted_msg_size = p_sec_msg->aes_gcm_data.payload_size;
+
+    return SGX_EA_SUCCESS;
+}
+
+sgx_ea_status_t sgx_tea_initiator_decrypt_msg(const uint8_t * encrypted_msg, uint32_t encrypted_msg_size, 
+                                                uint8_t * p_decrypted_msg, uint32_t decrypted_msg_size)
+{
+    sgx_status_t ret;
+    sgx_tea_sec_msg_t * p_sec_msg = NULL;    
+
+    if (!encrypted_msg || !p_decrypted_msg
+        || (encrypted_msg_size < sizeof(sgx_tea_sec_msg_t)))
+        return SGX_EA_ERROR_INVALID_PARAMETER;
+    
+    p_sec_msg = (sgx_tea_sec_msg_t *)encrypted_msg;
+
+    if (decrypted_msg_size < p_sec_msg->aes_gcm_data.payload_size)
+        return SGX_EA_ERROR_INVALID_PARAMETER;
+
+    if (sgx_is_within_enclave(encrypted_msg, encrypted_msg_size)
+        || sgx_is_within_enclave(p_decrypted_msg, decrypted_msg_size))
+        return SGX_EA_ERROR_INVALID_PARAMETER;  
+
+    uint8_t authenticated_data[AES_128_GCM_AAD_SIZE] = {0x23, 0x31, 0x98, 0x76, 0x67, 0x34, 0x86, 0x92, 0x36, 0x85, 0x72, 0x87, 0x68, 0x72, 0x84, 0x89};
+
+    ret = sgx_rijndael128GCM_decrypt(&m_ea_initiator_ctx.sk, p_sec_msg->aes_gcm_data.payload, 
+                                     decrypted_msg_size, p_decrypted_msg,
+                                     reinterpret_cast<uint8_t *>(p_sec_msg->aes_gcm_data.reserved), sizeof(p_sec_msg->aes_gcm_data.reserved), 
+                                     authenticated_data, sizeof(authenticated_data),
+                                     &p_sec_msg->aes_gcm_data.payload_tag);
+
+    if (ret != SGX_SUCCESS)
+        return SGX_EA_ERROR_CRYPTO;
+
+    return SGX_EA_SUCCESS;        
 }

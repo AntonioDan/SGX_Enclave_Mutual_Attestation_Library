@@ -77,6 +77,12 @@ sgx_ea_status_t sgx_tea_initiator_get_sec_msg_size(uint32_t rawmsgsize, uint32_t
 
 sgx_ea_status_t sgx_tea_initiator_encrypt_msg(const uint8_t * p_rawmsgbuf, uint32_t rawmsgsize,
                                                 uint8_t * p_secmsgbuf, uint32_t secmsgsize);
+
+sgx_ea_status_t sgx_tea_initiator_get_decrypted_msg_size(const uint8_t * encrypted_msg, uint32_t encrypted_msg_size, uint32_t * p_decrypted_msg_size);
+
+sgx_ea_status_t sgx_tea_initiator_decrypt_msg(const uint8_t * encrypted_msg, uint32_t encrypted_msg_size,
+                                               uint8_t * p_decrypted_msg, uint32_t decrypted_msg_size);
+
 #ifdef __cplusplus
 }
 #endif

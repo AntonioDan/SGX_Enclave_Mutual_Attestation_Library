@@ -28,12 +28,6 @@ sgx_ea_status_t CEAResponder::init()
     if (ret != SGX_SUCCESS)
         return SGX_EA_ERROR_LOAD_ENCLAVE;
 
-    /*ret = enclaveresponder_sgx_ea_init(m_eid, &earet, SGX_EA_ROLE_RESPONDER);
-    if ((ret != SGX_SUCCESS) || (earet != SGX_EA_SUCCESS)) {
-        sgx_destroy_enclave(m_eid);
-        return SGX_EA_ERROR_INIT_SESSION;
-    }*/
-
     m_p_quote = std::make_shared<CSGXECDSAQuote>();
 
     earet = m_p_quote->init_quote(); 
@@ -313,27 +307,12 @@ sgx_ea_status_t CEAResponder::verify_qe_report(sgx_ea_session_id_t sid, sgx_repo
     if (!m_inited)
         return SGX_EA_ERROR_UNINITIALIZED;
 
-    //ret = enclaveresponder_sgx_ea_responder_verify_qe_report_adv(m_eid, &earet, sid, report,
-      //              nonce, quote, quote_size, latest_qe_isvsvn);
     ret = enclaveresponder_sgx_tea_verify_qe_report_adv_withidx(m_eid, &earet, sid, report,
                     nonce, quote, quote_size, latest_qe_isvsvn);
     if ((ret != SGX_SUCCESS) || (earet != SGX_EA_SUCCESS)) {
         SE_TRACE_ERROR("failed to verify report, ecall return 0x%04x, function return 0x%04x.\n", ret, earet);
         return SGX_EA_ERROR_GEN_QUOTE;
     }
-
-    /*if (m_p_qeidentity)
-    {
-        const sgx_measurement_t& mrsigner = m_p_qeidentity->get_mr_signer();
-        const sgx_isv_svn_t& isvsvn = m_p_qeidentity->get_isvsvn();
-
-        if (((uint32_t)report->body.isv_svn != (uint32_t)isvsvn)
-           || (memcmp((uint8_t*)&mrsigner, (uint8_t*)&report->body.mr_signer, sizeof (sgx_measurement_t) != 0))
-           || ((report->body.attributes.flags & SGX_FLAGS_DEBUG) != 0))           
-        {
-            return SGX_EA_ERROR_QE_IDENTITY;
-        }
-    }*/
 
     return SGX_EA_SUCCESS;
 }

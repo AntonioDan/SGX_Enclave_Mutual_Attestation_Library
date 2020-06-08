@@ -52,10 +52,8 @@ int main(int argc, char * argv[])
 
     try 
     {        
-		std::shared_ptr<UnixServerTCPSocket> server_socket = std::make_shared<UnixServerTCPSocket>(m_server_config.m_port);
-        //CSelector * selector = new CSelector(server_socket);
-		std::shared_ptr<CSelector> selector = std::make_shared<CSelector>(server_socket);
-        //m_ea_server = new CEAServer(server_socket, selector);
+		std::shared_ptr<UnixServerTCPSocket> server_socket = std::make_shared<UnixServerTCPSocket>(m_server_config.m_port);        
+		std::shared_ptr<CSelector> selector = std::make_shared<CSelector>(server_socket);        
 		m_ea_server = std::make_shared<CEAServer>(server_socket, selector);
 
         m_ea_server->init();

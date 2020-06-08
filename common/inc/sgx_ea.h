@@ -10,6 +10,7 @@
 #define AES_128_GCM_IV_SIZE 16
 #define AES_128_GCM_AAD_SIZE 16
 #define AES_128_GCM_MAC_SIZE 16
+
 #define SGX_EA_VERSION   1
 
 typedef enum {
@@ -120,19 +121,14 @@ typedef struct sgx_uea_get_mk {
     sgx_ea_session_id_t sessionid;
 } sgx_uea_get_mk_t;
 
-typedef struct sgx_tea_sec_msg {
-    //uint8_t iv[AES_128_GCM_IV_SIZE];
-    //uint8_t aad[AES_128_GCM_AAD_SIZE];
-    //uint8_t mac[AES_128_GCM_MAC_SIZE];
-    //uint32_t msg_size;
-    //uint32_t message[0]; 
+typedef struct sgx_tea_sec_msg {    
     sgx_aes_gcm_data_t aes_gcm_data;
 } sgx_tea_sec_msg_t;
 
 // EA_MSG_SEC
 typedef struct sgx_ea_message_sec {
     sgx_ea_msg_header_t header;
-    sgx_ea_session_id_t sessionid;
+    sgx_ea_session_id_t sessionid; // if the message is from reponder to initiator, this field is empty
     sgx_tea_sec_msg_t sec_msg;
 } sgx_ea_msg_sec_t;
 

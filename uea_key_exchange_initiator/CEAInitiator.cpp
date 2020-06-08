@@ -240,3 +240,62 @@ sgx_ea_status_t CEAInitiator::get_sec_msg(const uint8_t *p_rawmsg, uint32_t rawm
 
     return SGX_EA_SUCCESS;
 }
+
+sgx_ea_status_t CEAInitiator::get_plain_msg_size(const uint8_t * encrypted_msg, uint32_t encrypted_msg_size, uint32_t * p_decrypted_msg_size)
+{
+    if (!encrypted_msg || !p_decrypted_msg_size || (encrypted_msg_size < (uint32_t)sizeof(sgx_tea_sec_msg_t)))
+        return SGX_EA_ERROR_INVALID_PARAMETER;
+
+    sgx_tea_sec_msg_t * p_sec_msg = (sgx_tea_sec_msg_t *)encrypted_msg;
+
+    *p_decrypted_msg_size = p_sec_msg->aes_gcm_data.payload_size;
+    
+    return SGX_EA_SUCCESS;
+}
+
+sgx_ea_status_t CEAInitiator::get_plain_msg(const uint8_t * encrypted_msg, uint32_t encrypted_msg_size,
+                                            uint8_t * p_decrypted_msg, uint32_t decrypted_msg_size)
+{    
+    sgx_status_t ret;
+    sgx_ea_status_t earet;
+
+    assert(encrypted_msg != NULL);
+    assert(p_decrypted_msg != NULL);
+
+    ret = enclaveinitiator_sgx_tea_initiator_decrypt_msg(m_eid, &earet, encrypted_msg, encrypted_msg_size,
+                                                        p_decrypted_msg, decrypted_msg_size);
+    if (ret != SGX_SUCCESS) {
+        return SGX_EA_ERROR_ENCLAVE;
+    }
+
+    return earet;    
+}
+
+sgx_ea_status_t CEAInitiator::get_plain_msg(const uint8_t * encrypted_msg, uint32_t encrypted_msg_size,
+                               uint8_t ** pp_decrypted_msg, uint32_t * p_decrypted_msg_size)
+{
+    sgx_ea_status_t earet;
+    uint8_t *p_rawmsg = NULL;
+    uint32_t decrypted_msg_size;
+
+    assert(encrypted_msg != NULL);
+    assert(pp_decrypted_msg != NULL);
+    assert(p_decrypted_msg_size != NULL);
+
+    earet = get_plain_msg_size(encrypted_msg, encrypted_msg_size, &decrypted_msg_size);
+    if (earet != SGX_EA_SUCCESS)
+        return earet;
+
+    p_rawmsg = new uint8_t[decrypted_msg_size];
+
+    earet = get_plain_msg(encrypted_msg, encrypted_msg_size, p_rawmsg, decrypted_msg_size);
+    if (earet != SGX_EA_SUCCESS) {
+        delete[] p_rawmsg;
+        return earet;
+    }
+
+    *pp_decrypted_msg = p_rawmsg;
+    *p_decrypted_msg_size = decrypted_msg_size; 
+
+    return SGX_EA_SUCCESS;
+}
