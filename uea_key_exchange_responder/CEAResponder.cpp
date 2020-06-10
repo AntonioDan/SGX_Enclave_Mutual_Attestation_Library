@@ -319,9 +319,10 @@ sgx_ea_status_t CEAResponder::verify_qe_report(sgx_ea_session_id_t sid, sgx_repo
 
 sgx_ea_status_t CEAResponder::get_decrypted_msg_size(const uint8_t * encrypted_msg, uint32_t encrypted_msg_size, uint32_t *p_decrypted_msg_size)
 {
-    if (!encrypted_msg || !p_decrypted_msg_size || (encrypted_msg_size < sizeof(sgx_tea_sec_msg_t)))
-        return SGX_EA_ERROR_INVALID_PARAMETER;
-
+    assert(encrypted_msg != NULL);
+    assert(p_decrypted_msg_size != NULL);
+    assert(encrypted_msg_size >= sizeof(sgx_tea_sec_msg_t));
+    
     sgx_tea_sec_msg_t * p_sec_msg = (sgx_tea_sec_msg_t *)encrypted_msg;
 
     *p_decrypted_msg_size = p_sec_msg->aes_gcm_data.payload_size;
@@ -375,6 +376,79 @@ sgx_ea_status_t CEAResponder::decrypt_ea_msg(sgx_ea_session_id_t sid, const uint
     return earet;
 }
 
+sgx_ea_status_t CEAResponder::get_sec_msg_size(uint32_t rawmsgsize, uint32_t *p_secmsgsize)
+{
+    sgx_status_t ret;
+    sgx_ea_status_t earet;
+
+    assert(p_secmsgsize != NULL);
+    
+    ret = enclaveresponder_sgx_ea_responder_get_encrypted_msg_size(m_eid, &earet, rawmsgsize, p_secmsgsize);
+    if (ret != SGX_SUCCESS) {
+        SE_TRACE_ERROR("failed to get secure message size, ecall return 0x%04x, function return 0x%04x, %s, line %d.\n",
+                            ret, earet, __FUNCTION__, __LINE__);    
+        return SGX_EA_ERROR_ENCLAVE;
+    }
+
+    return earet;
+}
+
+sgx_ea_status_t CEAResponder::encrypt_msg(sgx_ea_session_id_t sid, const uint8_t *p_rawmsg, uint32_t rawmsgsize,
+                                    uint8_t * p_encrypted_msg, uint32_t encrypted_msg_size)
+{
+    sgx_status_t ret;
+    sgx_ea_status_t earet;
+
+    assert(p_rawmsg != NULL);
+    assert(p_encrypted_msg != NULL);
+
+    ret = enclaveresponder_sgx_ea_responder_encrypt_msg(m_eid, &earet, sid, p_rawmsg, rawmsgsize, 
+                                                            p_encrypted_msg, encrypted_msg_size);
+    if (ret != SGX_SUCCESS) {
+        SE_TRACE_ERROR("failed to encrypt message, ecall return 0x%04x, function return 0x%04x, %s, line %d.\n",
+                            ret, earet, __FUNCTION__, __LINE__);    
+        return SGX_EA_ERROR_ENCLAVE;
+    }
+
+    return earet;
+}
+
+sgx_ea_status_t CEAResponder::get_sec_msg(sgx_ea_session_id_t sid, const uint8_t *p_rawmsg, uint32_t rawmsgsize,
+                                            uint8_t **pp_secmsg, uint32_t *p_secmsgsize)
+{
+    sgx_ea_status_t earet;
+    uint32_t secmsgsize;
+
+    assert(p_rawmsg != NULL);
+    assert(pp_secmsg != NULL);
+    assert(p_secmsgsize != NULL);
+    
+    earet = get_sec_msg_size(rawmsgsize, &secmsgsize);
+    if (earet != SGX_EA_SUCCESS)
+        return earet;
+
+    uint8_t *rawmsgbuf = NULL;
+    sgx_ea_msg_header_t *p_msgheader;
+
+    rawmsgbuf = new uint8_t[secmsgsize + sizeof(sgx_ea_msg_header_t) + sizeof(sgx_ea_session_id_t)];
+
+    p_msgheader = (sgx_ea_msg_header_t *)rawmsgbuf;
+
+    sgx_ea_init_msg_header(EA_MSG_SEC, p_msgheader);
+    p_msgheader->size = (uint32_t)sizeof(sgx_ea_session_id_t) + secmsgsize;
+
+    earet = encrypt_msg(sid, p_rawmsg, rawmsgsize, (uint8_t*)rawmsgbuf + sizeof(sgx_ea_msg_header_t) + sizeof(sgx_ea_session_id_t), secmsgsize);
+    if (earet != SGX_EA_SUCCESS) {
+        delete[] rawmsgbuf;
+        return earet;
+    }
+
+    *pp_secmsg = rawmsgbuf;
+    *p_secmsgsize = secmsgsize + (uint32_t)sizeof(sgx_ea_msg_header_t) + (uint32_t)sizeof(sgx_ea_session_id_t);
+
+    return SGX_EA_SUCCESS;
+}
+
 sgx_ea_status_t CEAResponder::uninit()
 {
     if (!m_inited)
@@ -387,3 +461,4 @@ sgx_ea_status_t CEAResponder::uninit()
 
     return SGX_EA_SUCCESS;
 }
+

@@ -126,6 +126,10 @@ sgx_ea_status_t sgx_ea_responder_decrypt_msg(sgx_ea_session_id_t sessionid, cons
  **/ 
 sgx_ea_status_t sgx_ea_responder_get_decrypted_msg_size(const uint8_t * encrypted_msg, uint32_t encrypted_msg_size, uint32_t * p_decrypted_msg_size);
 
+sgx_ea_status_t sgx_ea_responder_get_encrypted_msg_size(uint32_t rawmsgsize, uint32_t *p_secmsgsize);
+
+sgx_ea_status_t sgx_ea_responder_encrypt_msg(sgx_ea_session_id_t sessionid, const uint8_t * p_rawmsgbuf, uint32_t rawmsgsize,
+                                                uint8_t * p_secmsgbuf, uint32_t secmsgsize);
 #ifdef __cplusplus
 }
 #endif

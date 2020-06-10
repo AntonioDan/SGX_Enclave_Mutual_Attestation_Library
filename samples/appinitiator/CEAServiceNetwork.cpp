@@ -65,6 +65,8 @@ uint8_t* CEAServiceNetwork::recvMessage()
         throw NetworkException("failed to read message from socket");
     }
 
+    printf("received message header, size is 0x%x.\n", p_ea_msg_header->size);
+
     uint8_t * p_content = (uint8_t *)m_socket->readRaw(p_ea_msg_header->size);
     if (!p_content) {
         delete[] p_ea_msg_header;

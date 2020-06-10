@@ -7,7 +7,6 @@
 #include "sgx_ea_error.h"
 #include "sgx_tcrypto.h"
 #include "sgx_uea_key_exchange_responder.h"
-//#include "enclaveresponder_u.h"
 
 #define ENCLAVE_RESPONDER "libenclaveresponder.signed.so"
 #define QEIDENTITY_FILE   "qeidentity.json" 
@@ -16,25 +15,7 @@ CEAMsgHandler::CEAMsgHandler()
 {}
 
 sgx_ea_status_t CEAMsgHandler::init()
-{
-    /*
-    sgx_status_t ret;
-    sgx_ea_status_t earet;
-
-    ret = sgx_create_enclave(ENCLAVE_RESPONDER, 1, NULL, NULL, &m_enclave_id, NULL);
-    if (ret != SGX_SUCCESS) {
-        SE_TRACE_ERROR("fail to load enclave %s, error code is 0x%x.\n", ENCLAVE_RESPONDER, ret);
-        return SGX_EA_ERROR_LOAD_ENCLAVE;
-    }
-
-    ret = enclaveresponder_sgx_ea_init(m_enclave_id, &earet, SGX_EA_ROLE_RESPONDER);
-    if ((ret != SGX_SUCCESS) || (earet != SGX_EA_SUCCESS)) {
-        SE_TRACE_ERROR("fail to init enclave, error code is 0x%x.\n", ret);
-
-        sgx_destroy_enclave(m_enclave_id);
-        return SGX_EA_ERROR_LOAD_ENCLAVE;
-    }
-*/
+{    
     sgx_ea_status_t earet;
 
     earet = sgx_ea_init_responder();
@@ -155,6 +136,26 @@ sgx_ea_status_t CEAMsgHandler::proc_sec_msg(ICommunicationSocket * socket, sgx_e
     }
     printf("\n");
 
+    uint8_t *p_encryptedmsg = NULL;
+    uint32_t encryptedmsgsize;
+
+    earet = sgx_ea_responder_encrypt_msg(p_sec_msg->sessionid, p_plaintext, plaintextsize,
+                                                &p_encryptedmsg, &encryptedmsgsize);
+    if (earet != SGX_EA_SUCCESS) {
+        SE_TRACE_ERROR("failed to encrypt message, earet is 0x%04x, %s, line %d.\n", earet, __FUNCTION__, __LINE__);
+        delete[] p_plaintext;
+        return earet;
+    }
+   
+    ssize_t writesize;
+
+    writesize = socket->writeRaw((char*)p_encryptedmsg, encryptedmsgsize);
+    if (writesize != encryptedmsgsize) {
+        SE_TRACE_ERROR("failed to send secure message, earet is 0x%04x, %s, line %d.\n", earet, __FUNCTION__, __LINE__);
+        earet = SGX_EA_ERROR_NETWORK;
+    }
+
+    delete[] p_encryptedmsg;    
     return earet;
 }
 
@@ -173,7 +174,7 @@ int CEAMsgHandler::procmsg(EAServerMsg * request)
 
     msgheader = (sgx_ea_msg_header_t *)receivedmsg;
     msgtype = msgheader->type;
-    //SE_TRACE_NOTICE("received message type %d.\n", (int)msgtype);
+    
     switch (msgtype)
     {
         case EA_MSG0:

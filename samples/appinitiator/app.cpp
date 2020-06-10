@@ -21,6 +21,7 @@ typedef sgx_ea_status_t (*f_initiator_query_server_session_key)();
 typedef sgx_ea_status_t (*f_initiator_set_qeidentity)(const char * qeidentityfilename);
 typedef sgx_ea_status_t (*f_uea_init_initiator_adv)(std::shared_ptr<CEAServiceTranslator> tanslator);
 typedef sgx_ea_status_t (*f_uea_initiator_sendmsg)(const uint8_t * p_sentmsg, uint32_t sentmsgsize);
+typedef sgx_ea_status_t (*f_uea_initiator_recvmsg)(uint8_t **pp_msg, uint32_t *p_msgsize);
 
 int main(int argc, char * argv[])
 {
@@ -52,6 +53,7 @@ int main(int argc, char * argv[])
     f_initiator_query_server_session_key pfquerysessionkey = NULL;
     f_initiator_set_qeidentity pfsetqeidentity = NULL;
     f_uea_initiator_sendmsg pfsendmsg = NULL;
+    f_uea_initiator_recvmsg pfrecvmsg = NULL;
 
     uea_handler = dlopen(UEA_KEY_EXCHANGE_LIB_HANDLE, RTLD_LAZY);
     if (!uea_handler) {
@@ -65,10 +67,11 @@ int main(int argc, char * argv[])
     pfquerysessionkey = (f_initiator_query_server_session_key)dlsym(uea_handler, "sgx_uea_initiator_query_server_session_key");
     pfsetqeidentity = (f_initiator_set_qeidentity)dlsym(uea_handler, "sgx_uea_initiator_set_qeidentity");
     pfsendmsg = (f_uea_initiator_sendmsg)dlsym(uea_handler, "sgx_uea_initiator_sendmsg");
+    pfrecvmsg = (f_uea_initiator_recvmsg)dlsym(uea_handler, "sgx_uea_initiator_recvmsg");
 
     if ((pfinit == NULL) || (pfcreateasession == NULL) 
          || (pfgetsessionkey == NULL) || (pfquerysessionkey == NULL) 
-         || (pfsetqeidentity == NULL) || (pfsendmsg == NULL)) {
+         || (pfsetqeidentity == NULL) || (pfsendmsg == NULL) || (pfrecvmsg == NULL)) {
         SE_TRACE_ERROR("failed to get function interface from uea key exchange library.");
         dlclose(uea_handler);
         exit(0);
@@ -130,7 +133,25 @@ int main(int argc, char * argv[])
         return -1;
     }
 
-    printf("Message sent.\n");
+    uint8_t *p_recvmsg;
+    uint32_t recvmsgsize;
+
+    earetval = pfrecvmsg(&p_recvmsg, &recvmsgsize);
+    if (earetval != SGX_EA_SUCCESS) {
+        printf("failed to receive message, return code 0x%04x.\n", earetval);
+        dlclose(uea_handler);
+        return -1;
+    }
+
+    if ((recvmsgsize != 16) 
+        || (memcmp(p_recvmsg, message, 16) != 0)) {
+        printf("received message doesn't match with sent message.\n");
+    } else
+    {
+        printf("received message match with sent message.\n");
+    }
+    
+    delete[] p_recvmsg;   
 
     dlclose(uea_handler);
 

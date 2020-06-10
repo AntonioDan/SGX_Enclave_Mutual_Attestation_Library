@@ -29,14 +29,7 @@ sgx_ea_status_t CEAInitiator::init(sgx_target_info_t * qe_target_info)
     ret = sgx_create_enclave(ENCLAVE_INITIATOR, 1, NULL, NULL, &m_eid, NULL);
     if (ret != SGX_SUCCESS) {
         return SGX_EA_ERROR_LOAD_ENCLAVE;
-    }
-
-    /*ret = enclaveinitiator_sgx_ea_init(m_eid, &earet, SGX_EA_ROLE_INITIATOR);
-    if ((ret != SGX_SUCCESS) || (earet != SGX_EA_SUCCESS)) {
-        SE_TRACE_ERROR("failed to init initiator enclave in function %s, line %d.\n", __FUNCTION__, __LINE__);
-        sgx_destroy_enclave(m_eid);
-        return SGX_EA_ERROR_INIT_SESSION;
-    }*/
+    }    
 
     m_qe_target = *qe_target_info;
     m_inited = true;

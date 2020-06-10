@@ -235,8 +235,7 @@ sgx_ea_status_t CEAInitiatorctx::sendmsg2getmsg3content(sgx_ea_session_id_t sess
         delete[] p_quote;
         return earet;
     }
-
-    //earet = m_quote->gen_quote((uint8_t*)&p_msg2content->report, (uint8_t*)&p_msg2content->qe_report_info, p_quote, quote_size);
+    
     earet = m_quote->gen_quote((uint8_t*)&p_msg2content->report, (uint8_t*)&qereportinfo, p_quote, quote_size);
     if (earet != SGX_EA_SUCCESS) {
         SE_TRACE_ERROR("failed to generate quote in function %s, line %d.\n", __FUNCTION__, __LINE__);
@@ -248,7 +247,6 @@ sgx_ea_status_t CEAInitiatorctx::sendmsg2getmsg3content(sgx_ea_session_id_t sess
     }
 
     // ECALL to verify QE report
-    //earet = m_ea_initiator->verify_qe_report(&p_msg2content->qe_report_info.qe_report, (uint8_t *)&p_msg2content->qe_report_info.nonce, 
     earet = m_ea_initiator->verify_qe_report(&qereportinfo.qe_report, (uint8_t *)&qereportinfo.nonce, 
                                                 p_quote, quote_size, latest_qe_isvsvn);
     if (earet != SGX_EA_SUCCESS) {

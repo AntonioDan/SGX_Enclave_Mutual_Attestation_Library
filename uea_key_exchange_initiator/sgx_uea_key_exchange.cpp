@@ -188,6 +188,5 @@ sgx_ea_status_t sgx_uea_initiator_recvmsg(uint8_t ** pp_recvmsg, uint32_t * p_ms
         return SGX_EA_ERROR_UNEXPECTED;        
     }
     
-
     return SGX_EA_SUCCESS;
 }

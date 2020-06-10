@@ -129,6 +129,24 @@ void sgx_ea_responder_show_qeidentity();
 sgx_ea_status_t sgx_ea_responder_proc_msg(sgx_ea_session_id_t sid, const uint8_t * rawmsg, uint32_t msgsize,
                                             uint8_t **pp_decrypted_msg, uint32_t *p_msgsize);
 
+/**
+ * This function wrapps trusted interface to encrype message before sending to initiator
+ * 
+ * @param sessionid - This is session id input.
+ * @param rawmsg - This points to input message buffer {rawmsg, msgsize}
+ * @param msgsize - This is input message size
+ * @param pp_encrypted_msg - This points to output message buffer. The message format is sgx_ea_msg_sec_t, see sgx_ea.h.
+ * @param p_encrypted_msgsize - This points to output message buffer size
+ * 
+ * @return Status of the operation, one of below values:
+ *      - SGX_EA_SUCCESS
+ *      - SGX_EA_ERROR_UNEXPECTED
+ *      - SGX_EA_ERROR_INVALID_PARAMETER
+ *      - SGX_EA_ERROR_CRYPTO   
+ **/ 
+sgx_ea_status_t sgx_ea_responder_encrypt_msg(sgx_ea_session_id_t sid, const uint8_t * rawmsg, uint32_t msgsize,
+                                                uint8_t **pp_encrypted_msg, uint32_t *p_encrypted_msgsize);
+
 #ifdef __cplusplus
 }
 #endif

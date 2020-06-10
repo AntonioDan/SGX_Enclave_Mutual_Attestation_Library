@@ -196,3 +196,24 @@ sgx_ea_status_t sgx_ea_responder_proc_msg(sgx_ea_session_id_t sid, const uint8_t
         return SGX_EA_ERROR_UNEXPECTED;
     }
 }
+
+sgx_ea_status_t sgx_ea_responder_encrypt_msg(sgx_ea_session_id_t sid, const uint8_t * rawmsg, uint32_t msgsize,
+                                                uint8_t **pp_encrypted_msg, uint32_t *p_encrypted_msgsize)
+{
+    if (!rawmsg || !pp_encrypted_msg || !p_encrypted_msgsize)
+        return SGX_EA_ERROR_INVALID_PARAMETER;
+
+    if (!m_ea_responder)
+        return SGX_EA_ERROR_UNINITIALIZED;
+
+    try
+    {
+        return m_ea_responder->get_sec_msg(sid, rawmsg, msgsize, pp_encrypted_msg, p_encrypted_msgsize);
+    }
+    catch(const std::exception& e)
+    {
+        SE_TRACE_WARNING("meet unexpected exception when encrypting message.\n");
+        std::cerr << e.what() << '\n';
+        return SGX_EA_ERROR_UNEXPECTED;
+    }    
+}
