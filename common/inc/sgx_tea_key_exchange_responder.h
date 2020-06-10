@@ -126,8 +126,28 @@ sgx_ea_status_t sgx_ea_responder_decrypt_msg(sgx_ea_session_id_t sessionid, cons
  **/ 
 sgx_ea_status_t sgx_ea_responder_get_decrypted_msg_size(const uint8_t * encrypted_msg, uint32_t encrypted_msg_size, uint32_t * p_decrypted_msg_size);
 
+/**
+ * This function gets encrypted message size according to raw message size.
+ *
+ * @param rawmsgsize - this is raw message size.
+ * @param p_secmsgsize - this points to encrypted message size.
+ *
+ * @return Status of this operation, one of below values:
+ *      - SGX_EA_SUCCESS
+ *      - SGX_EA_ERROR_INVALID_PARAMETER
+ *      - SGX_EA_ERROR_UNEXPECTED
+ **/ 
 sgx_ea_status_t sgx_ea_responder_get_encrypted_msg_size(uint32_t rawmsgsize, uint32_t *p_secmsgsize);
 
+/**
+ * This function encrypts input message with specified secure session.
+ *
+ * @param sessionid - This is secure session id.
+ * @param p_rawmsgbuf - This points to input message buffer.
+ * @param rawmsgsize - This is input message buffer size.
+ * @param p_secmsgbuf - This points to output message buffer. User needs to allocate this buffer.
+ * @param secmsgsize - This points output message buffer size.
+ **/ 
 sgx_ea_status_t sgx_ea_responder_encrypt_msg(sgx_ea_session_id_t sessionid, const uint8_t * p_rawmsgbuf, uint32_t rawmsgsize,
                                                 uint8_t * p_secmsgbuf, uint32_t secmsgsize);
 #ifdef __cplusplus
