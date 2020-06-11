@@ -44,6 +44,13 @@ class CEAResponder {
         sgx_ea_status_t get_sec_msg(sgx_ea_session_id_t sid, const uint8_t *p_rawmsg, uint32_t rawmsgsize,
                                             uint8_t **pp_secmsg, uint32_t *p_secmsgsize);
 
+		/**
+		 * This function close secure session indexed by session id.
+		 *
+		 * @param sid - this is session id
+		 **/ 
+		sgx_ea_status_t close_session(sgx_ea_session_id_t sid);
+
         sgx_ea_status_t uninit();
 
     private:

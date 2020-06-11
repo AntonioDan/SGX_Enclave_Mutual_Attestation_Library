@@ -118,6 +118,16 @@ sgx_ea_status_t sgx_uea_initiator_sendmsg(const uint8_t * p_sentmsg, uint32_t se
  **/ 
 sgx_ea_status_t sgx_uea_initiator_recvmsg(uint8_t **pp_msg, uint32_t *p_msgsize);
 
+/**
+ *  This function tries to close secure session.
+ * 
+ *  @return Status of this operation, one of below values:
+ *      - SGX_EA_SUCCESS
+ *      - SGX_EA_ERROR_UNINITIALIZED
+ *      - SGX_EA_ERROR_UNEXPECTED
+ **/ 
+sgx_ea_status_t sgx_uea_initiator_close_ea_session();
+
 #ifdef __cplusplus
 }
 #endif

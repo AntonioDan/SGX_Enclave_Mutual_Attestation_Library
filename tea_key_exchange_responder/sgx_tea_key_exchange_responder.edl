@@ -24,5 +24,7 @@ enclave {
 
         public sgx_ea_status_t sgx_ea_responder_encrypt_msg(sgx_ea_session_id_t sessionid, [user_check]const uint8_t * p_rawmsgbuf, uint32_t rawmsgsize,
                                                 [user_check]uint8_t * p_secmsgbuf, uint32_t secmsgsize);
+
+		public sgx_ea_status_t sgx_ea_responder_close_ea_session(sgx_ea_session_id_t sessionid);
     };
 };

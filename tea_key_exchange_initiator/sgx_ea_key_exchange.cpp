@@ -392,3 +392,12 @@ sgx_ea_status_t sgx_tea_initiator_decrypt_msg(const uint8_t * encrypted_msg, uin
 
     return SGX_EA_SUCCESS;        
 }
+
+sgx_ea_status_t sgx_tea_initiator_close_session()
+{
+    m_ea_initiator_ctx.status = SGX_EA_SESSION_INITED;
+
+    memset(&m_ea_initiator_ctx, 0, sizeof(sgx_ea_initiator_context_t));
+    
+    return SGX_EA_SUCCESS;
+}

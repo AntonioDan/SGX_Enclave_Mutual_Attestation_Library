@@ -22,6 +22,7 @@ typedef enum {
     EA_MSG3,
     EA_MSG_SEC,
     EA_MSG_GET_MK,
+    EA_MSG_CLOSE,
     EA_MSG_UNKNOWN
 } sgx_ea_msg_type_t;
 
@@ -36,7 +37,7 @@ typedef enum {
     SGX_EA_SESSION_WAIT_FOR_MSG2,
     SGX_EA_SESSION_WAIT_FOR_MSG3,
     SGX_EA_SESSION_ESTABLISHED,
-    SGX_EA_SESSION_UNEXPECTED
+    SGX_EA_SESSION_UNEXPECTED,    
 } sgx_ea_session_status_t;
 
 #pragma pack(push,1)
@@ -131,6 +132,12 @@ typedef struct sgx_ea_message_sec {
     sgx_ea_session_id_t sessionid; // if the message is from reponder to initiator, this field is empty
     sgx_tea_sec_msg_t sec_msg;
 } sgx_ea_msg_sec_t;
+
+// EA_MSG_CLOSE client -> responder
+typedef struct sgx_ea_message_close {
+    sgx_ea_msg_header_t header;
+    sgx_ea_session_id_t sessionid;
+} sgx_ea_msg_close_t;
 
 typedef struct sgx_ea_message {
     uint32_t size;

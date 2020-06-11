@@ -73,15 +73,67 @@ sgx_ea_status_t sgx_ea_initiator_proc_msg3_content(sgx_tea_msg3_content_t *p_msg
  **/ 
 sgx_ea_status_t sgx_ea_initiator_get_mk(sgx_aes_gcm_128bit_key_t * key);
 
+/**
+ * This function gets secure message size according to raw messge size.
+ * 
+ * @param rawmsgsize - This is raw message size.
+ * @param p_secmsgsize - This points to secure messge size output.
+ * 
+ * @return Status of this operation, one of below values:
+ *      - SGX_EA_SUCCESS
+ *      - SGX_EA_ERROR_INVALID_PARAMETER 
+ **/
 sgx_ea_status_t sgx_tea_initiator_get_sec_msg_size(uint32_t rawmsgsize, uint32_t *p_secmsgsize);
 
+/**
+ * This function encrypts raw message {p_rawmsgbuf, rawmsgsize}, the encrypted message is in buffer {p_secmsgbuf, secmsgsize}.
+ * 
+ * @param p_rawmsgbuf - This points to raw message buffer. This buffer is allocated by caller.
+ * @param rawmsgsize - This is raw message size.
+ * @param p_secmsgbuf - This points to secure message buffer output, the buffer is allocated by caller.
+ * @param secmsgsize - This is secure message buffer size.
+ * 
+ * @return Status of this operation, one of below values:
+ *      - SGX_EA_SUCCESS
+ *      - SGX_EA_ERROR_INVALID_PARAMETER 
+ **/
 sgx_ea_status_t sgx_tea_initiator_encrypt_msg(const uint8_t * p_rawmsgbuf, uint32_t rawmsgsize,
                                                 uint8_t * p_secmsgbuf, uint32_t secmsgsize);
 
+/**
+ * This function gets decrypted message size according to encrypted message.
+ * 
+ * @param encrytped_msg - This points to encrypted message buffer.
+ * @param encrytped_msg_size - This is encrypted message buffer size.
+ * @param p_decrypted_msg_size - This points to decrypted message size output buffer.
+ * 
+ * @return Status of this operation, one of below values:
+ *      - SGX_EA_SUCCESS
+ *      - SGX_EA_ERROR_INVALID_PARAMETER 
+ **/
 sgx_ea_status_t sgx_tea_initiator_get_decrypted_msg_size(const uint8_t * encrypted_msg, uint32_t encrypted_msg_size, uint32_t * p_decrypted_msg_size);
 
+/**
+ * This function decrypt input message. 
+ * 
+ * @param encrypted_msg - This points to encrypted message buffer.
+ * @param encrypted_msg_size - This is encrypted message buffer size.
+ * @param p_decrtyped_msg - This points to decrypted message buffer output.
+ * @param decrypted_msg_size - This is decrypted message buffer size.
+ * 
+ * @return Status of this operation, one of below values:
+ *      - SGX_EA_SUCCESS
+ *      - SGX_EA_ERROR_INVALID_PARAMETER
+ *      - SGX_EA_ERROR_CRYPTO
+ *      - SGX_EA_ERROR_UNEXPECTED
+ **/
 sgx_ea_status_t sgx_tea_initiator_decrypt_msg(const uint8_t * encrypted_msg, uint32_t encrypted_msg_size,
                                                uint8_t * p_decrypted_msg, uint32_t decrypted_msg_size);
+
+/**
+ * This function close secure session.
+ **/
+sgx_ea_status_t sgx_tea_initiator_close_session();
 
 #ifdef __cplusplus
 }

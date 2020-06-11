@@ -150,6 +150,18 @@ sgx_ea_status_t sgx_ea_responder_get_encrypted_msg_size(uint32_t rawmsgsize, uin
  **/ 
 sgx_ea_status_t sgx_ea_responder_encrypt_msg(sgx_ea_session_id_t sessionid, const uint8_t * p_rawmsgbuf, uint32_t rawmsgsize,
                                                 uint8_t * p_secmsgbuf, uint32_t secmsgsize);
+
+/**
+ * This function close specified secure session.
+ *
+ * @param sessionid - this is session id
+ *
+ * @return Status of this operation, one of below values:
+ * 		- SGX_EA_SUCCESS
+ * 		- SGX_EA_ERROR_UNEXPECTED
+ **/ 
+sgx_ea_status_t sgx_ea_responder_close_ea_session(sgx_ea_session_id_t sessionid);
+
 #ifdef __cplusplus
 }
 #endif

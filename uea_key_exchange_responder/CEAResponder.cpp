@@ -449,6 +449,23 @@ sgx_ea_status_t CEAResponder::get_sec_msg(sgx_ea_session_id_t sid, const uint8_t
     return SGX_EA_SUCCESS;
 }
 
+sgx_ea_status_t CEAResponder::close_session(sgx_ea_session_id_t sid)
+{
+	sgx_status_t ret;
+	sgx_ea_status_t earet;
+
+	if (!m_inited)
+		return SGX_EA_ERROR_UNINITIALIZED;
+
+	ret = enclaveresponder_sgx_ea_responder_close_ea_session(m_eid, &earet, sid); 
+	if (ret != SGX_SUCCESS) {
+		SE_TRACE_ERROR("ecall return failure.\n");
+		return SGX_EA_ERROR_ENCLAVE;
+	}
+	
+	return earet;	
+}
+
 sgx_ea_status_t CEAResponder::uninit()
 {
     if (!m_inited)

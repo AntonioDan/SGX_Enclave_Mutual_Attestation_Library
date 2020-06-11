@@ -29,6 +29,20 @@ static sgx_ea_context_t * find_ea_session(sgx_ea_session_id_t sessionid)
     return (iter == m_ea_responder_ctx_vec.end()) ? NULL : *iter;    
 }
 
+static void close_ea_session(sgx_ea_session_id_t sessionid)
+{
+    auto iter = std::find_if(m_ea_responder_ctx_vec.begin(), m_ea_responder_ctx_vec.end(), [&](const sgx_ea_context_t * obj){
+        return (obj->sessionid == sessionid);
+    });
+
+	if (iter != m_ea_responder_ctx_vec.end()) {
+		m_ea_responder_ctx_vec.erase(iter);
+		free(*iter);
+	}
+
+	return;
+}
+
 sgx_ea_status_t derivekey(uint8_t keytype, const sgx_ec256_dh_shared_t *dhkey, sgx_cmac_128bit_tag_t * outputkey)
 {
     sgx_status_t ret;
@@ -531,4 +545,13 @@ sgx_ea_status_t sgx_ea_responder_encrypt_msg(sgx_ea_session_id_t sessionid, cons
         return SGX_EA_ERROR_CRYPTO;
 
     return SGX_EA_SUCCESS;
+}
+
+sgx_ea_status_t sgx_ea_responder_close_ea_session(sgx_ea_session_id_t sessionid)
+{
+	sgx_spin_lock(&m_ea_db_lock);
+	close_ea_session(sessionid);
+    sgx_spin_unlock(&m_ea_db_lock);
+	
+	return SGX_EA_SUCCESS;
 }

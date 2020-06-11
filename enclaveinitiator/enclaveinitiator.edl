@@ -7,6 +7,7 @@ enclave {
 
     trusted {
         public sgx_ea_status_t ea_create_session(sgx_ea_session_id_t sid, [in, count=1] sgx_target_info_t * p_qe_target);
+        public sgx_ea_status_t ea_close_session();
     };
 
     untrusted {

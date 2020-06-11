@@ -159,6 +159,19 @@ sgx_ea_status_t CEAMsgHandler::proc_sec_msg(ICommunicationSocket * socket, sgx_e
     return earet;
 }
 
+sgx_ea_status_t CEAMsgHandler::proc_close_msg(sgx_ea_session_id_t sid)
+{
+	sgx_ea_status_t earet;
+
+	earet = sgx_ea_responder_close_session(sid);
+	if (earet != SGX_EA_SUCCESS) {
+		SE_TRACE_ERROR("failed to close secure session.\n");
+	} else {
+		SE_TRACE_NOTICE("sesion %d closed.\n", (uint32_t)sid);
+	}
+	return SGX_EA_SUCCESS;
+}
+
 int CEAMsgHandler::procmsg(EAServerMsg * request)
 {
     uint8_t * receivedmsg = NULL;
@@ -232,6 +245,19 @@ int CEAMsgHandler::procmsg(EAServerMsg * request)
                 return ret;
         }
         break;
+
+		case EA_MSG_CLOSE:
+		{
+			sgx_ea_status_t ret;
+			sgx_ea_msg_close_t * p_close_msg;
+
+			p_close_msg = (sgx_ea_msg_close_t *)receivedmsg;
+			ret = proc_close_msg(p_close_msg->sessionid);
+			if (ret != SGX_EA_SUCCESS) {
+				return ret;
+			}		
+		}
+		break;
 
     default:
         break;

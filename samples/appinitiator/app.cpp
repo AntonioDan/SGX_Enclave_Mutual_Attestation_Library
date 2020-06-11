@@ -22,6 +22,7 @@ typedef sgx_ea_status_t (*f_initiator_set_qeidentity)(const char * qeidentityfil
 typedef sgx_ea_status_t (*f_uea_init_initiator_adv)(std::shared_ptr<CEAServiceTranslator> tanslator);
 typedef sgx_ea_status_t (*f_uea_initiator_sendmsg)(const uint8_t * p_sentmsg, uint32_t sentmsgsize);
 typedef sgx_ea_status_t (*f_uea_initiator_recvmsg)(uint8_t **pp_msg, uint32_t *p_msgsize);
+typedef sgx_ea_status_t (*f_uea_initiator_close_ea_session)();
 
 int main(int argc, char * argv[])
 {
@@ -54,6 +55,7 @@ int main(int argc, char * argv[])
     f_initiator_set_qeidentity pfsetqeidentity = NULL;
     f_uea_initiator_sendmsg pfsendmsg = NULL;
     f_uea_initiator_recvmsg pfrecvmsg = NULL;
+	f_uea_initiator_close_ea_session pfclosesession = NULL;
 
     uea_handler = dlopen(UEA_KEY_EXCHANGE_LIB_HANDLE, RTLD_LAZY);
     if (!uea_handler) {
@@ -68,10 +70,11 @@ int main(int argc, char * argv[])
     pfsetqeidentity = (f_initiator_set_qeidentity)dlsym(uea_handler, "sgx_uea_initiator_set_qeidentity");
     pfsendmsg = (f_uea_initiator_sendmsg)dlsym(uea_handler, "sgx_uea_initiator_sendmsg");
     pfrecvmsg = (f_uea_initiator_recvmsg)dlsym(uea_handler, "sgx_uea_initiator_recvmsg");
+	pfclosesession = (f_uea_initiator_close_ea_session)dlsym(uea_handler, "sgx_uea_initiator_close_ea_session");
 
     if ((pfinit == NULL) || (pfcreateasession == NULL) 
          || (pfgetsessionkey == NULL) || (pfquerysessionkey == NULL) 
-         || (pfsetqeidentity == NULL) || (pfsendmsg == NULL) || (pfrecvmsg == NULL)) {
+         || (pfsetqeidentity == NULL) || (pfsendmsg == NULL) || (pfrecvmsg == NULL) || (pfclosesession == NULL)) {
         SE_TRACE_ERROR("failed to get function interface from uea key exchange library.");
         dlclose(uea_handler);
         exit(0);
@@ -153,6 +156,14 @@ int main(int argc, char * argv[])
     
     delete[] p_recvmsg;   
 
+	earetval = pfclosesession();
+	if (earetval != SGX_EA_SUCCESS) {
+		printf("failed to close secure session, return code 0x%04x.\n", earetval);
+		dlclose(uea_handler);
+		return -1;		
+	}
+
+	printf("session closed.\n");
     dlclose(uea_handler);
 
     return 0;

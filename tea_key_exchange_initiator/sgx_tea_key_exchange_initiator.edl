@@ -43,5 +43,10 @@ enclave {
          **/
         public sgx_ea_status_t sgx_tea_initiator_decrypt_msg([user_check]const uint8_t * encrypted_msg, uint32_t encrypted_msg_size,
                                                [user_check]uint8_t * p_decrypted_msg, uint32_t decrypted_msg_size);
+
+        /**
+         * This function close secure session.
+         */
+        sgx_ea_status_t sgx_tea_initiator_close_session();
     };
 };

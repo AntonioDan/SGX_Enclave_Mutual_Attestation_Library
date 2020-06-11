@@ -147,6 +147,17 @@ sgx_ea_status_t sgx_ea_responder_proc_msg(sgx_ea_session_id_t sid, const uint8_t
 sgx_ea_status_t sgx_ea_responder_encrypt_msg(sgx_ea_session_id_t sid, const uint8_t * rawmsg, uint32_t msgsize,
                                                 uint8_t **pp_encrypted_msg, uint32_t *p_encrypted_msgsize);
 
+/**
+ * This function close specified secure sesion.
+ *
+ * @param sid - This is secure session id.
+ *
+ * @return Status of this operation, one of below values:
+ * 		- SGX_EA_SUCCESS
+ *		- SGX_EA_ERROR_INVALID_PARAMETER
+ *		- SGX_EA_ERROR_UNEXPECTED
+ **/ 
+sgx_ea_status_t sgx_ea_responder_close_session(sgx_ea_session_id_t sid);
 #ifdef __cplusplus
 }
 #endif

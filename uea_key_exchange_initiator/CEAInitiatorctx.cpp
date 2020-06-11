@@ -10,7 +10,7 @@
 #include "se_trace.h"
 
 CEAInitiatorctx::CEAInitiatorctx(std::shared_ptr<CEAServiceTranslator> translator, std::shared_ptr<CSGXECDSAQuote> quote, std::shared_ptr<CSGXECDSAQuoteVerifier> quote_verifier, std::shared_ptr<CEAQEIdentity> qeidentity) 
-        : m_inited(false), m_translator(translator), m_quote(quote), 
+        : m_status(SESSION_UNUSED), m_translator(translator), m_quote(quote), 
             m_p_quote_verifier(quote_verifier), m_p_qeidentity(qeidentity)
 {
     m_ea_initiator = std::make_shared<CEAInitiator>();
@@ -22,7 +22,7 @@ CEAInitiatorctx::~CEAInitiatorctx()
 
 void CEAInitiatorctx::init()
 {
-    if (m_inited)
+    if (m_status != SESSION_UNUSED)
         return;
 
     sgx_target_info_t qe_target;
@@ -32,7 +32,7 @@ void CEAInitiatorctx::init()
     m_ea_initiator->init(&qe_target);
     m_translator->init();
     
-    m_inited = true;
+    m_status = SESSION_INITED;
 }
 
 sgx_ea_status_t CEAInitiatorctx::request_session_id(sgx_ea_session_id_t * p_sid)
@@ -42,7 +42,7 @@ sgx_ea_status_t CEAInitiatorctx::request_session_id(sgx_ea_session_id_t * p_sid)
     if (!p_sid)
         return SGX_EA_ERROR_INVALID_PARAMETER;
 
-    if (!m_inited)
+    if (m_status != SESSION_INITED)
         return SGX_EA_ERROR_UNINITIALIZED;
 
     sgx_ea_init_msg_header(EA_MSG0, &eamsg0.header);
@@ -79,7 +79,7 @@ sgx_ea_status_t CEAInitiatorctx::create_ea_session()
 {
     sgx_ea_status_t earet; 
 
-    if (!m_inited)
+    if (m_status != SESSION_INITED)
         return SGX_EA_ERROR_UNINITIALIZED;
 
     sgx_ea_session_id_t sid;
@@ -88,17 +88,23 @@ sgx_ea_status_t CEAInitiatorctx::create_ea_session()
     if (earet != SGX_EA_SUCCESS)
         return earet;
 
-    return m_ea_initiator->create_session(sid);
+    earet = m_ea_initiator->create_session(sid);
+	if (earet != SGX_EA_SUCCESS) {
+		close_responder_session(sid);
+		return earet;	
+	}
+
+	m_status = SESSION_ESTABLISHED;
+	return SGX_EA_SUCCESS;	
 }
 
 sgx_ea_status_t CEAInitiatorctx::get_msg1_content(sgx_ea_session_id_t sessionid, sgx_tea_msg1_content_t *p_msg1content)
 {
     sgx_ea_nonce_t nonce;
-    //sgx_status_t ret;
     sgx_ea_status_t earet;
     sgx_qe_report_info_t qvereportinfo;
 
-    if (!m_inited)
+    if (m_status != SESSION_INITED)
         return SGX_EA_ERROR_UNINITIALIZED;
 
     if (!p_msg1content)
@@ -215,7 +221,7 @@ sgx_ea_status_t CEAInitiatorctx::sendmsg2getmsg3content(sgx_ea_session_id_t sess
     sgx_isv_svn_t latest_qe_isvsvn = DEF_QE_ISVSVN_THRESHOLD;
     sgx_qe_report_info_t qereportinfo;
 
-    if (!m_inited)
+    if (m_status != SESSION_INITED)
         return SGX_EA_ERROR_UNINITIALIZED;
 
     earet = m_quote->get_quote_size(&quote_size);
@@ -399,4 +405,44 @@ sgx_ea_status_t CEAInitiatorctx::recv_message(uint8_t **pp_msg, uint32_t *p_msgs
     uint32_t sec_msg_size = msgheader->size - (uint32_t)sizeof(sgx_ea_msg_header_t) - (uint32_t)sizeof(sgx_ea_session_id_t);
     
     return m_ea_initiator->get_plain_msg((uint8_t *)p_sec_msg, sec_msg_size, pp_msg, p_msgsize);    
+}
+
+sgx_ea_status_t CEAInitiatorctx::close_ea_session()
+{
+    sgx_ea_status_t earet;
+
+	if (m_status != SESSION_ESTABLISHED)
+		return SGX_EA_ERROR_UNEXPECTED;
+
+    earet = m_ea_initiator->close_ea_session();
+	if (earet != SGX_EA_SUCCESS) {
+        return earet;
+	}
+
+	earet = close_responder_session(m_sid);
+	if (earet != SGX_EA_SUCCESS) {
+		return earet;
+	}
+
+	m_status = SESSION_INITED;
+
+	return SGX_EA_SUCCESS;
+}
+
+sgx_ea_status_t CEAInitiatorctx::close_responder_session(sgx_ea_session_id_t sid)
+{
+    sgx_ea_msg_close_t ea_close_msg;
+
+    sgx_ea_init_msg_header(EA_MSG_CLOSE, &ea_close_msg.header);
+    ea_close_msg.header.size = sizeof(sgx_ea_session_id_t);
+    ea_close_msg.sessionid = sid;
+
+    size_t sendsize;
+    sendsize = m_translator->sendMessage((uint8_t *)&ea_close_msg, sizeof(sgx_ea_msg_close_t));
+    if (sendsize != sizeof(sgx_ea_msg_close_t)) {
+        SE_TRACE_ERROR("failed to send message in function %s, line %d.\n", __FUNCTION__, __LINE__);        
+        throw NetworkException("failed to send or receive message");
+    }
+
+    return SGX_EA_SUCCESS;
 }

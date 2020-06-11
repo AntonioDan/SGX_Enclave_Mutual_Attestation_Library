@@ -67,6 +67,8 @@ class CEAInitiator {
         sgx_ea_status_t get_plain_msg(const uint8_t * encrypted_msg, uint32_t encrypted_msg_size,
                                        uint8_t ** pp_decrypted_msg, uint32_t * p_decrypted_msg_size);
 
+        sgx_ea_status_t close_ea_session();
+
         sgx_ea_status_t uninit();
 
     private:

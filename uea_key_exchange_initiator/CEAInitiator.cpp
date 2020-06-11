@@ -258,6 +258,7 @@ sgx_ea_status_t CEAInitiator::get_plain_msg(const uint8_t * encrypted_msg, uint3
     ret = enclaveinitiator_sgx_tea_initiator_decrypt_msg(m_eid, &earet, encrypted_msg, encrypted_msg_size,
                                                         p_decrypted_msg, decrypted_msg_size);
     if (ret != SGX_SUCCESS) {
+        SE_TRACE_ERROR("fail to call ECALL interface to decrypt message, earet is 0x%04x, %s, line %d.\n", ret, __FUNCTION__, __LINE__);
         return SGX_EA_ERROR_ENCLAVE;
     }
 
@@ -291,4 +292,17 @@ sgx_ea_status_t CEAInitiator::get_plain_msg(const uint8_t * encrypted_msg, uint3
     *p_decrypted_msg_size = decrypted_msg_size; 
 
     return SGX_EA_SUCCESS;
+}
+
+sgx_ea_status_t CEAInitiator::close_ea_session()
+{
+    sgx_status_t ret;
+    sgx_ea_status_t earet;
+
+    ret = enclaveinitiator_ea_close_session(m_eid, &earet);
+    if (ret != SGX_SUCCESS) {
+        SE_TRACE_ERROR("fail to call ECALL interface to close session, earet is 0x%04x, %s, line %d.\n", ret, __FUNCTION__, __LINE__);
+        return SGX_EA_ERROR_ENCLAVE;
+    }
+    return earet;
 }

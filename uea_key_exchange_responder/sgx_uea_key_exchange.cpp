@@ -217,3 +217,21 @@ sgx_ea_status_t sgx_ea_responder_encrypt_msg(sgx_ea_session_id_t sid, const uint
         return SGX_EA_ERROR_UNEXPECTED;
     }    
 }
+
+sgx_ea_status_t sgx_ea_responder_close_session(sgx_ea_session_id_t sid)
+{
+	if (!m_ea_responder)
+		return SGX_EA_ERROR_UNINITIALIZED;
+
+	try
+	{
+		return m_ea_responder->close_session(sid);
+	}
+	catch (const std::exception& e)
+	{
+        SE_TRACE_WARNING("meet unexpected exception when encrypting message.\n");
+        std::cerr << e.what() << '\n';
+        return SGX_EA_ERROR_UNEXPECTED;
+	}
+	return SGX_EA_SUCCESS;
+}

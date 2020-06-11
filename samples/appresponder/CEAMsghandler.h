@@ -20,6 +20,7 @@ class CEAMsgHandler {
         sgx_ea_status_t procmsg2(ICommunicationSocket * socket, sgx_uea_msg2_t *msg2);
         sgx_ea_status_t proc_sec_msg(ICommunicationSocket * socket, sgx_ea_msg_sec_t *p_sec_msg);
         sgx_ea_status_t get_mk_by_sessionid(sgx_ea_session_id_t sessionid);
+		sgx_ea_status_t proc_close_msg(sgx_ea_session_id_t sid);
 
     private:
         //sgx_enclave_id_t m_enclave_id;
