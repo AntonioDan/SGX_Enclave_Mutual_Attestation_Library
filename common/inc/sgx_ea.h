@@ -32,7 +32,8 @@ typedef enum {
 } sgx_ea_role_t;
 
 typedef enum {
-    SGX_EA_SESSION_INITED = 1,
+    SGX_EA_SESSION_UNUSED = 1,
+    SGX_EA_SESSION_INITED,
     SGX_EA_SESSION_WAIT_FOR_MSG1,
     SGX_EA_SESSION_WAIT_FOR_MSG2,
     SGX_EA_SESSION_WAIT_FOR_MSG3,
@@ -42,6 +43,7 @@ typedef enum {
 
 #pragma pack(push,1)
 typedef uint32_t sgx_ea_session_id_t;
+#define SGX_EA_SESSION_INVALID_ID (sgx_ea_session_id_t)(-1)
 
 typedef struct sgx_ea_nonce {
     uint8_t data[SGX_EA_NONCE_SIZE];
@@ -70,14 +72,14 @@ typedef struct sgx_uea_msg0_resp {
 typedef struct sgx_uea_msg1_req {
     sgx_ea_msg_header_t header;
     sgx_ea_session_id_t sessionid;
-    sgx_ea_nonce_t nonce;
+    sgx_ea_nonce_t nonce; // this nonce is generated inside initiator enclave and sent to untrusted part through OCALL interface.
 } sgx_uea_msg1_req_t;;
 
 // EA MSG1 : Responder -> Initiator
 typedef struct sgx_tea_msg1_content {
-    sgx_ea_nonce_t nonce;
+    sgx_ea_nonce_t nonce; // this nonce is generated in initiator enclave, responder copies it into the nonce here
     sgx_ec256_public_t pubkey;
-    sgx_report_t report;
+    sgx_report_t report; // report.data = SHA256(nonce || pubkey)
     //sgx_qe_report_info_t qe_report_info;
 } sgx_tea_msg1_content_t;
 

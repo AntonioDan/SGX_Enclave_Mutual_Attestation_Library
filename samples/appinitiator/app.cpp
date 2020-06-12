@@ -50,8 +50,10 @@ int main(int argc, char * argv[])
     void * uea_handler = NULL;
     f_uea_init_initiator_adv pfinit = NULL;
     f_create_ea_session pfcreateasession = NULL;
+#ifdef DEBUG
     f_initiator_get_session_key pfgetsessionkey = NULL;
     f_initiator_query_server_session_key pfquerysessionkey = NULL;
+#endif
     f_initiator_set_qeidentity pfsetqeidentity = NULL;
     f_uea_initiator_sendmsg pfsendmsg = NULL;
     f_uea_initiator_recvmsg pfrecvmsg = NULL;
@@ -65,20 +67,29 @@ int main(int argc, char * argv[])
 
     pfinit = (f_uea_init_initiator_adv)dlsym(uea_handler, "sgx_uea_init_initiator_adv");
     pfcreateasession = (f_create_ea_session)dlsym(uea_handler, "sgx_uea_initiator_create_ea_session");
+#ifdef DEBUG
     pfgetsessionkey = (f_initiator_get_session_key)dlsym(uea_handler, "sgx_uea_initiator_get_session_key");
     pfquerysessionkey = (f_initiator_query_server_session_key)dlsym(uea_handler, "sgx_uea_initiator_query_server_session_key");
+#endif
     pfsetqeidentity = (f_initiator_set_qeidentity)dlsym(uea_handler, "sgx_uea_initiator_set_qeidentity");
     pfsendmsg = (f_uea_initiator_sendmsg)dlsym(uea_handler, "sgx_uea_initiator_sendmsg");
     pfrecvmsg = (f_uea_initiator_recvmsg)dlsym(uea_handler, "sgx_uea_initiator_recvmsg");
 	pfclosesession = (f_uea_initiator_close_ea_session)dlsym(uea_handler, "sgx_uea_initiator_close_ea_session");
 
     if ((pfinit == NULL) || (pfcreateasession == NULL) 
-         || (pfgetsessionkey == NULL) || (pfquerysessionkey == NULL) 
          || (pfsetqeidentity == NULL) || (pfsendmsg == NULL) || (pfrecvmsg == NULL) || (pfclosesession == NULL)) {
         SE_TRACE_ERROR("failed to get function interface from uea key exchange library.");
         dlclose(uea_handler);
         exit(0);
     }
+
+#ifdef DEBUG
+	if (()pfgetsessionkey == NULL) || (pfquerysessionkey == NULL) {
+        SE_TRACE_ERROR("failed to get function interface from uea key exchange library.");
+        dlclose(uea_handler);
+        exit(0);
+	}
+#endif
 
     earetval = pfinit(p_translator);
     if (earetval != SGX_EA_SUCCESS) {
@@ -103,6 +114,7 @@ int main(int argc, char * argv[])
 
     SE_TRACE_NOTICE("succeed to create session.\n");
 
+#ifdef DEBUG
     sgx_aes_gcm_128bit_key_t key;
 
     earetval = pfgetsessionkey(&key);
@@ -125,17 +137,18 @@ int main(int argc, char * argv[])
     }
    
     pfquerysessionkey();
+#endif
 
-    uint8_t message[16];
+	const char * message = "Hello, this is SGX Mutual Enclave Attestation library!";
     
-    memset(message, 0xab, 16);
-    earetval = pfsendmsg(message, sizeof(message));
+    earetval = pfsendmsg((uint8_t *)message, (uint32_t)strlen(message));
     if (earetval != SGX_EA_SUCCESS) {
         printf("failed to send message, return code is 0x%04x.\n", earetval);
         dlclose(uea_handler);
         return -1;
     }
 
+	printf("Message sent to responder.\n");
     uint8_t *p_recvmsg;
     uint32_t recvmsgsize;
 
@@ -146,8 +159,8 @@ int main(int argc, char * argv[])
         return -1;
     }
 
-    if ((recvmsgsize != 16) 
-        || (memcmp(p_recvmsg, message, 16) != 0)) {
+    if ((recvmsgsize != (uint32_t)strlen(message)) 
+        || (memcmp(p_recvmsg, message, (uint32_t)strlen(message)) != 0)) {
         printf("received message doesn't match with sent message.\n");
     } else
     {

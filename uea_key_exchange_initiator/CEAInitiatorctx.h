@@ -29,14 +29,15 @@ class CEAInitiatorctx {
         void init();
 
         sgx_ea_status_t create_ea_session();
-        sgx_ea_status_t get_msg1_content(sgx_ea_session_id_t sessionid, sgx_tea_msg1_content_t *p_msg1content);
+        sgx_ea_status_t get_msg1_content(sgx_ea_session_id_t sessionid, sgx_ea_nonce_t *p_nonce, sgx_tea_msg1_content_t *p_msg1content, sgx_report_body_t *p_responder_report_body);
         sgx_ea_status_t sendmsg2getmsg3content(sgx_ea_session_id_t sessionid, sgx_tea_msg2_content_t *p_msg2content, sgx_tea_msg3_content_t *p_msg3content);
+#ifdef DEBUG
         sgx_ea_status_t get_initiator_key(sgx_aes_gcm_128bit_key_t * key);
         sgx_ea_status_t get_responder_key();
+#endif
         sgx_ea_status_t send_message(const uint8_t * p_msg, uint32_t size);
         sgx_ea_status_t recv_message(uint8_t **pp_msg, uint32_t *p_msgsize);
-        sgx_ea_status_t close_ea_session();
-        //sgx_ea_status_t close_ea_session_ocall();
+        sgx_ea_status_t close_ea_session();        
 		sgx_ea_status_t close_responder_session(sgx_ea_session_id_t sid);
 
     public:

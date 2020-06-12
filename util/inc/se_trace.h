@@ -43,8 +43,8 @@ typedef enum
 {
 	SE_TRACE_ERROR,
 	SE_TRACE_WARNING,
+	SE_TRACE_DEBUG,
 	SE_TRACE_NOTICE,
-	SE_TRACE_DEBUG
 } se_trace_t;
 
 #ifndef SE_DEBUG_LEVEL

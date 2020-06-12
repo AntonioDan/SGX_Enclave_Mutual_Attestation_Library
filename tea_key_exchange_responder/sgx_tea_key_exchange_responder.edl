@@ -12,8 +12,6 @@ enclave {
         public sgx_ea_status_t sgx_ea_responder_gen_msg1_content(sgx_ea_session_id_t sessionid, [in, count=1]const sgx_ea_nonce_t * nonce, [in, count=1]const sgx_target_info_t * target, [out, count = 1]sgx_tea_msg1_content_t * p_msg1content);
 
         public sgx_ea_status_t sgx_ea_responder_gen_msg3_content(sgx_ea_session_id_t sessionid, [in, count = 1]const sgx_tea_msg2_content_t * msg2, [out, count = 1]sgx_tea_msg3_content_t * msg3);
-        
-        public sgx_ea_status_t sgx_ea_responder_get_mk(sgx_ea_session_id_t sessionid, [out, count = 1]sgx_aes_gcm_128bit_key_t *key);
 
         public sgx_ea_status_t sgx_ea_responder_get_decrypted_msg_size([user_check]const uint8_t * encrypted_msg, uint32_t encrypted_msg_size, [out, count=1]uint32_t * p_decrypted_msg_size);
 

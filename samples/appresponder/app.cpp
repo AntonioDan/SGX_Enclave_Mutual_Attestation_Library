@@ -21,8 +21,7 @@ void signal_handler(int sig)
         case SIGTERM:
         {
             if (m_ea_server) {
-                m_ea_server->shutdown();
-                //delete m_ea_server;
+                m_ea_server->shutdown();                
             }
         }
         break;
@@ -57,6 +56,9 @@ int main(int argc, char * argv[])
 		m_ea_server = std::make_shared<CEAServer>(server_socket, selector);
 
         m_ea_server->init();
+        
+        printf("Server is started, press Ctrl+C to exit...\n");
+        
         m_ea_server->doWork();
 
     } catch (char const * error_msg)

@@ -55,6 +55,7 @@ sgx_ea_status_t CEAInitiator::create_session(sgx_ea_session_id_t sid)
     return SGX_EA_SUCCESS;
 }
 
+#ifdef DEBUG
 sgx_ea_status_t CEAInitiator::get_session_key(sgx_aes_gcm_128bit_key_t * key)
 {
     sgx_status_t ret;
@@ -75,6 +76,7 @@ sgx_ea_status_t CEAInitiator::get_session_key(sgx_aes_gcm_128bit_key_t * key)
 
     return SGX_EA_SUCCESS;
 }
+#endif
 
 sgx_ea_status_t CEAInitiator::uninit()
 {

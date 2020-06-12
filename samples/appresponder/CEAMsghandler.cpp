@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include "CEAMsghandler.h"
 
 #include "se_trace.h"
@@ -26,12 +27,12 @@ sgx_ea_status_t CEAMsgHandler::init()
 
     earet = sgx_ea_responder_init_qeidentity(QEIDENTITY_FILE);
     if (earet != SGX_EA_SUCCESS) {
-        SE_TRACE_WARNING("failed to init qe identity.\n");
-        // tbd: suppress this warning
-        //return earet;
+        SE_TRACE_WARNING("failed to init qe identity.\n");        
     }
 
+#ifdef DEBUG
     sgx_ea_responder_show_qeidentity();
+#endif
 
     return SGX_EA_SUCCESS;
 }
@@ -119,6 +120,7 @@ sgx_ea_status_t CEAMsgHandler::proc_sec_msg(ICommunicationSocket * socket, sgx_e
     uint32_t rawmsgsize;
     uint8_t * p_plaintext = NULL;
     uint32_t plaintextsize;
+	uint8_t messagebuf[256] = {0};
 
     rawmsgsize = p_sec_msg->header.size - (uint32_t)sizeof(sgx_ea_msg_header_t) - (uint32_t)sizeof(sgx_ea_session_id_t);
 
@@ -129,12 +131,17 @@ sgx_ea_status_t CEAMsgHandler::proc_sec_msg(ICommunicationSocket * socket, sgx_e
         return earet;
     }
 
+	printf("Received message:\n");
+	if (plaintextsize < 256) {
+		memcpy(messagebuf, p_plaintext, plaintextsize);
+		printf("%s\n", (char *)messagebuf);
+	}
+	/*
     int i;
-
     for (i = 0; i < plaintextsize; i++) {
         printf("0x%02x ", p_plaintext[i]);
     }
-    printf("\n");
+    printf("\n");*/
 
     uint8_t *p_encryptedmsg = NULL;
     uint32_t encryptedmsgsize;
@@ -220,6 +227,7 @@ int CEAMsgHandler::procmsg(EAServerMsg * request)
         }
         break;       
 
+#ifdef DEBUG
         case EA_MSG_GET_MK:
         {
             sgx_ea_status_t ret;
@@ -233,6 +241,7 @@ int CEAMsgHandler::procmsg(EAServerMsg * request)
             }
         }
         break;
+#endif
 
         case EA_MSG_SEC:
         {
@@ -266,6 +275,7 @@ int CEAMsgHandler::procmsg(EAServerMsg * request)
     return SGX_EA_SUCCESS;
 }
 
+#ifdef DEBUG
 sgx_ea_status_t CEAMsgHandler::get_mk_by_sessionid(sgx_ea_session_id_t sessionid)
 {
     sgx_ea_status_t earet;
@@ -291,6 +301,7 @@ sgx_ea_status_t CEAMsgHandler::get_mk_by_sessionid(sgx_ea_session_id_t sessionid
     }
     return SGX_EA_SUCCESS;
 }
+#endif
 
 CEAMsgHandler * CEAMsgHandlerProvider::m_handler = NULL;
 

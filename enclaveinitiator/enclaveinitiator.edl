@@ -1,5 +1,6 @@
 enclave {
     include "sgx_trts.h"
+    include "sgx_report.h"
     include "sgx_ea_error.h"
 
     from "sgx_tea_key_exchange_initiator.edl" import *;
@@ -8,10 +9,13 @@ enclave {
     trusted {
         public sgx_ea_status_t ea_create_session(sgx_ea_session_id_t sid, [in, count=1] sgx_target_info_t * p_qe_target);
         public sgx_ea_status_t ea_close_session();
+        
+        //public sgx_ea_status_t verify_responder_report([in, count=1]const sgx_report_body_t *report_body, [in, count=1]const sgx_tea_msg1_content_t * p_tea_msg1);
+        //public sgx_ea_status_t generate_quote_nonce_for_responder([in, count=1]sgx_quote_nonce_t * p_nonce);
     };
 
     untrusted {
-        sgx_ea_status_t sgx_uea_initiator_get_msg1_content_ocall(sgx_ea_session_id_t sessionid, [out, count=1]sgx_tea_msg1_content_t *p_msg1content) allow (sgx_tea_get_qe_report_info, sgx_tea_get_qve_report_info, sgx_ea_verify_qve_result);
+        sgx_ea_status_t sgx_uea_initiator_get_msg1_content_ocall(sgx_ea_session_id_t sessionid, [in, count=1]sgx_ea_nonce_t *p_nonce, [out, count=1]sgx_tea_msg1_content_t *p_msg1content, [out, count=1]sgx_report_body_t *p_responder_report_body) allow (sgx_tea_get_qe_report_info, sgx_tea_get_qve_report_info, sgx_ea_verify_qve_result);
         sgx_ea_status_t sgx_uea_initiator_get_msg3_content_ocall(sgx_ea_session_id_t sessionid, [in, count=1]sgx_tea_msg2_content_t *p_msg2content, [out, count=1]sgx_tea_msg3_content_t *p_msg3content) allow (sgx_tea_get_qe_report_info, sgx_tea_get_qve_report_info, sgx_tea_verify_qe_report_adv);
     };
 };

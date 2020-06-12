@@ -3,6 +3,7 @@
 #include <time.h>
 
 #include "sgx_tcrypto.h"
+#include "sgx_quote_3.h"
 #include "CEAInitiatorctx.h"
 #include "CEAQEIdentity.h"
 #include "sgx_ea.h"
@@ -98,31 +99,24 @@ sgx_ea_status_t CEAInitiatorctx::create_ea_session()
 	return SGX_EA_SUCCESS;	
 }
 
-sgx_ea_status_t CEAInitiatorctx::get_msg1_content(sgx_ea_session_id_t sessionid, sgx_tea_msg1_content_t *p_msg1content)
-{
-    sgx_ea_nonce_t nonce;
+sgx_ea_status_t CEAInitiatorctx::get_msg1_content(sgx_ea_session_id_t sessionid, sgx_ea_nonce_t *p_nonce, sgx_tea_msg1_content_t *p_msg1content, sgx_report_body_t *p_responder_report_body)
+{    
     sgx_ea_status_t earet;
     sgx_qe_report_info_t qvereportinfo;
 
     if (m_status != SESSION_INITED)
         return SGX_EA_ERROR_UNINITIALIZED;
 
-    if (!p_msg1content)
-        return SGX_EA_ERROR_INVALID_PARAMETER;
-
-    // <tbd> I feel this nonce should be generated and checked in trusted part
-    for (uint32_t i = 0; i < sizeof(nonce)/sizeof(int); i++)
-    {
-        *(int *)((uint8_t *)nonce.data + sizeof(int) * i) = rand();
-    }
+    if (!p_nonce || !p_msg1content || !p_responder_report_body)
+        return SGX_EA_ERROR_INVALID_PARAMETER;   
 
     sgx_uea_msg1_req_t msg1req;
 
     sgx_ea_init_msg_header(EA_MSG1_REQ, &msg1req.header);
-    msg1req.header.size = sizeof(sessionid) + sizeof(nonce);
+    msg1req.header.size = sizeof(sessionid) + sizeof(sgx_ea_nonce_t);
     msg1req.sessionid = sessionid;
-    msg1req.nonce = nonce;
-
+    memcpy(&msg1req.nonce, (uint8_t *)p_nonce, sizeof(sgx_ea_nonce_t));
+    
     uint8_t * rawmsgresp = NULL;
     rawmsgresp = m_translator->sendandrecv((uint8_t *)&msg1req, sizeof(sgx_uea_msg1_req_t));
     if (!rawmsgresp) {
@@ -204,8 +198,9 @@ sgx_ea_status_t CEAInitiatorctx::get_msg1_content(sgx_ea_session_id_t sessionid,
         return earet;
     }
 
-	// verify report embeded in Quote
-	//
+    sgx_quote3_t * p_quote = (sgx_quote3_t *)p_ea_msg1->quote;
+
+    memcpy((uint8_t*)p_responder_report_body, (uint8_t *)&p_quote->report_body, sizeof(sgx_report_body_t));
     memcpy((uint8_t *)p_msg1content, (uint8_t*)&p_ea_msg1->msgbody, sizeof(sgx_tea_msg1_content_t));
 
     delete[] p_supplemental_data;
@@ -301,6 +296,7 @@ sgx_ea_status_t CEAInitiatorctx::sendmsg2getmsg3content(sgx_ea_session_id_t sess
     return SGX_EA_SUCCESS;
 }
 
+#ifdef DEBUG
 sgx_ea_status_t CEAInitiatorctx::get_initiator_key(sgx_aes_gcm_128bit_key_t * key)
 {
     return m_ea_initiator->get_session_key(key);
@@ -323,6 +319,7 @@ sgx_ea_status_t CEAInitiatorctx::get_responder_key()
 
     return SGX_EA_SUCCESS;
 }
+#endif
 
 sgx_ea_status_t CEAInitiatorctx::init_qe_identity(const string& qeidentity)
 {

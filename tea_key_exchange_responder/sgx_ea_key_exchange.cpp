@@ -412,6 +412,7 @@ sgx_ea_status_t sgx_ea_responder_gen_msg3_content(sgx_ea_session_id_t sessionid,
     return SGX_EA_SUCCESS;
 }
 
+#ifdef DEBUG
 sgx_ea_status_t sgx_ea_responder_get_mk(sgx_ea_session_id_t sessionid, sgx_aes_gcm_128bit_key_t *key)
 {
     sgx_ea_context_t *ptr_ea_session = NULL;
@@ -433,6 +434,7 @@ sgx_ea_status_t sgx_ea_responder_get_mk(sgx_ea_session_id_t sessionid, sgx_aes_g
 
     return SGX_EA_SUCCESS;
 }
+#endif
 
 sgx_ea_status_t sgx_ea_responder_get_decrypted_msg_size(const uint8_t * encrypted_msg, uint32_t encrypted_msg_size, uint32_t * p_decrypted_msg_size)
 {

@@ -116,6 +116,14 @@ sgx_ea_status_t sgx_ea_initiator_init_session(sgx_ea_session_id_t sessionid)
     return SGX_EA_SUCCESS;
 }
 
+sgx_ea_status_t sgx_ea_initiator_uninit_session()
+{
+    m_ea_initiator_ctx.sessionid = SGX_EA_SESSION_INVALID_ID;
+    m_ea_initiator_ctx.status = SGX_EA_SESSION_UNUSED;
+
+    return SGX_EA_SUCCESS;
+}
+
 sgx_ea_status_t sgx_ea_initiator_gen_msg2_content(sgx_tea_msg1_content_t * p_msg1content, sgx_target_info_t * p_qe_target, sgx_tea_msg2_content_t* p_msg2content)
 {
     sgx_ec256_public_t pubkey;
@@ -286,6 +294,7 @@ sgx_ea_status_t sgx_ea_initiator_proc_msg3_content(sgx_tea_msg3_content_t *p_msg
     return SGX_EA_SUCCESS;
 }
 
+#ifdef DEBUG
 sgx_ea_status_t sgx_ea_initiator_get_mk(sgx_aes_gcm_128bit_key_t * key)
 {
     if (!key)
@@ -298,6 +307,7 @@ sgx_ea_status_t sgx_ea_initiator_get_mk(sgx_aes_gcm_128bit_key_t * key)
     
     return SGX_EA_SUCCESS;
 }
+#endif
 
 sgx_ea_status_t sgx_tea_initiator_get_sec_msg_size(uint32_t rawmsgsize, uint32_t *p_secmsgsize)
 {

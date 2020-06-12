@@ -242,6 +242,7 @@ sgx_ea_status_t CEAResponder::proc_msg2_get_msg3(sgx_ea_session_id_t sid, sgx_ue
     return SGX_EA_SUCCESS;
 }
 
+#ifdef DEBUG
 sgx_ea_status_t CEAResponder::get_session_key(sgx_ea_session_id_t sid, sgx_aes_gcm_128bit_key_t * key)
 {
     sgx_status_t ret;
@@ -257,6 +258,7 @@ sgx_ea_status_t CEAResponder::get_session_key(sgx_ea_session_id_t sid, sgx_aes_g
         
     return SGX_EA_SUCCESS;
 }
+#endif
 
 sgx_ea_status_t CEAResponder::init_qeidentity(const string& s_qeidentity)
 {

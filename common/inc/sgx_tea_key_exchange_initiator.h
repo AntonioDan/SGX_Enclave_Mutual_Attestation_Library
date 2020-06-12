@@ -66,12 +66,14 @@ sgx_ea_status_t sgx_ea_initiator_gen_msg2_content(sgx_tea_msg1_content_t * msg1,
  **/ 
 sgx_ea_status_t sgx_ea_initiator_proc_msg3_content(sgx_tea_msg3_content_t *p_msg3content);
 
+#ifdef DEBUG
 /**
  * This is a debug stub function. After secure session is done, user can call this function to readout session key for debug purpose. You should never enable this function in your product!!
  *
  * @param key - This points to session key output buffer.
  **/ 
 sgx_ea_status_t sgx_ea_initiator_get_mk(sgx_aes_gcm_128bit_key_t * key);
+#endif
 
 /**
  * This function gets secure message size according to raw messge size.
@@ -134,6 +136,14 @@ sgx_ea_status_t sgx_tea_initiator_decrypt_msg(const uint8_t * encrypted_msg, uin
  * This function close secure session.
  **/
 sgx_ea_status_t sgx_tea_initiator_close_session();
+
+/**
+ * This function reset secure session.
+ * 
+ * @return Status of this operation, one of below values:
+ *      - SGX_EA_SUCCESS
+ **/ 
+sgx_ea_status_t sgx_ea_initiator_uninit_session();
 
 #ifdef __cplusplus
 }

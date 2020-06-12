@@ -15,7 +15,9 @@ class CEAInitiator {
     public:
         sgx_ea_status_t init(sgx_target_info_t * p_qe_target);
         sgx_ea_status_t create_session(sgx_ea_session_id_t sid);
+#ifdef DEBUG
         sgx_ea_status_t get_session_key(sgx_aes_gcm_128bit_key_t * key);        
+#endif
         sgx_ea_status_t verify_qe_report(sgx_report_t * qereport, uint8_t * nonce, uint8_t * quote, uint32_t quote_size, sgx_isv_svn_t latest_qe_isvsvn = 4);
         sgx_ea_status_t get_qve_reportinfo(sgx_qe_report_info_t * qereportinfo);
         sgx_ea_status_t get_qe_reportinfo(sgx_qe_report_info_t * qereportinfo);

@@ -53,9 +53,9 @@ sgx_ea_status_t sgx_uea_initiator_create_ea_session()
 }
 
 // this is for OCALL support
-sgx_ea_status_t sgx_uea_initiator_get_msg1_content_ocall(sgx_ea_session_id_t sessionid, sgx_tea_msg1_content_t *p_msg1content)
+sgx_ea_status_t sgx_uea_initiator_get_msg1_content_ocall(sgx_ea_session_id_t sessionid, sgx_ea_nonce_t *p_nonce, sgx_tea_msg1_content_t *p_msg1content, sgx_report_body_t *p_responder_report_body)
 {
-    if (!p_msg1content)
+    if (!p_nonce || !p_msg1content || !p_responder_report_body)
         return SGX_EA_ERROR_INVALID_PARAMETER;
 
     if (!m_initiator)
@@ -63,7 +63,7 @@ sgx_ea_status_t sgx_uea_initiator_get_msg1_content_ocall(sgx_ea_session_id_t ses
    
     try
     {
-        return m_initiator->get_msg1_content(sessionid, p_msg1content);
+        return m_initiator->get_msg1_content(sessionid, p_nonce, p_msg1content, p_responder_report_body);
     } catch (NetworkException& exception) {
         return SGX_EA_ERROR_NETWORK;
     } catch (...) {
@@ -89,26 +89,7 @@ sgx_ea_status_t sgx_uea_initiator_get_msg3_content_ocall(sgx_ea_session_id_t ses
     }
 }
 
-/*
-sgx_ea_status_t sgx_uea_initiator_close_session_ocall(sgx_ea_session_id_t sid)
-{
-	if (!m_initiator)
-		return SGX_EA_ERROR_UNINITIALIZED;
-
-	try
-	{
-		return m_initiator->close_ea_session_ocall();
-	}catch (NetworkException& exception) 
-	{
-		return SGX_EA_ERROR_NETWORK;
-	}
-	catch(...)
-	{
-		return SGX_EA_ERROR_UNEXPECTED;
-	}	
-}
-*/
-
+#ifdef DEBUG
 sgx_ea_status_t sgx_uea_initiator_get_session_key(sgx_aes_gcm_128bit_key_t * key)
 {
     if (!m_initiator)
@@ -137,6 +118,7 @@ sgx_ea_status_t sgx_uea_initiator_query_server_session_key()
         return SGX_EA_ERROR_UNEXPECTED;
     }
 }
+#endif
 
 /* This function initializes QE identity.
  * Input parameters:

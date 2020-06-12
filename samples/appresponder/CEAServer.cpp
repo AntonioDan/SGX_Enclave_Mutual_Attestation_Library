@@ -4,7 +4,6 @@
 #include "IServerSocket.h"
 #include "ICommunicationSocket.h"
 #include "SocketTranslator.h"
-//#include "EAException.h"
 #include "CEAServerMsg.h"
 #include "sgx_ea.h"
 
@@ -21,10 +20,7 @@ CEAServer::CEAServer(std::shared_ptr<IServerSocket> server_socket, std::shared_p
 CEAServer::~CEAServer()
 {
     shutdown();
-    m_thread.join();
-    //delete m_translator;
-    //delete m_serversocket;
-    //delete m_selector;
+    m_thread.join();    
 }
 
 void CEAServer::init()
@@ -55,8 +51,7 @@ void CEAServer::doWork()
             /* read contents */
             std::list<ICommunicationSocket *>::iterator iter;
 
-            for (iter = newlist.begin(); iter != newlist.end();) {
-                //EARawMsg * message = m_translator->receiveRequest(*iter);
+            for (iter = newlist.begin(); iter != newlist.end();) {                
                 uint8_t * message = m_translator->receiveRequest(*iter);
                 if (!message) {
                     m_selector->removeSocket(*iter);

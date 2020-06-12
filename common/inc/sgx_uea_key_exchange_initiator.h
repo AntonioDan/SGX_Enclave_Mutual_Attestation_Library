@@ -74,6 +74,7 @@ sgx_ea_status_t sgx_uea_initiator_set_qeidentity(const char * qeidentityfilename
  **/ 
 sgx_ea_status_t sgx_uea_initiator_create_ea_session();
 
+#ifdef DEBUG
 /**
  * This function is for debug purpose.
  * After establishing secure session, user can call this function to retrieve initiator session key.
@@ -87,6 +88,7 @@ sgx_ea_status_t sgx_uea_initiator_get_session_key(sgx_aes_gcm_128bit_key_t * key
  * This function should never be included or enabled in your product code!!!
  **/ 
 sgx_ea_status_t sgx_uea_initiator_query_server_session_key();
+#endif
 
 /**
  * This function sends {p_sentmsg, sendmsgsize} to responder through eastalished secure channel.

@@ -140,6 +140,7 @@ sgx_ea_status_t sgx_ea_responder_proc_msg2_gen_msg3(sgx_ea_session_id_t sessioni
     }
 }
 
+#ifdef DEBUG
 sgx_ea_status_t sgx_ea_responder_get_session_key(sgx_ea_session_id_t sessionid, sgx_aes_gcm_128bit_key_t *key)
 {
     if (!key)
@@ -164,6 +165,7 @@ sgx_ea_status_t sgx_ea_responder_get_session_key(sgx_ea_session_id_t sessionid, 
         return SGX_EA_ERROR_UNEXPECTED;
     }
 }
+#endif
 
 void sgx_ea_responder_show_qeidentity()
 {
