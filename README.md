@@ -1,49 +1,42 @@
 Intel(R) SGX Enclave Mutual Attestation Library for confidential computing in distributed environment.
 =====================================================================
-# Overview:
--------
+# Overview
 This library aims to provide a reference design in which two enclaves running in different physical machines can mutually attest each other and establish secure channel.
 
-# Background:
--------
- In distributed environment, users are more and more interested with how to guarantee data confidentiality and privacy when they leverages cloud computing infra. E.g., an organization who owns confidential data would like to use a commercial cloud computing provider while they have concern to leak their data, internet users don't like their browse records are recorded or analyzed by some third-party orgnazation, who are interested to deduce user behaviour and make money for this. Some technology have been provided to address such problems, e.g. classical SSL/TLS protocal can be used to establish secure session between client browser and service provider. However, there are some known limitations, mainly because there is no trusted execution environment (TEE) which can protect data in use. 
-
+# Background
+In distributed environment, users are more and more interested with how to guarantee data confidentiality and privacy when they leverages cloud computing infra. E.g., an organization who owns confidential data would like to use a commercial cloud computing provider while they have concern to leak their data, internet users don't like their browse records are recorded or analyzed by some third-party orgnazation, who are interested to deduce user behaviour and make money for this. Some technology have been provided to address such problems, e.g. classical SSL/TLS protocal can be used to establish secure session between client browser and service provider. However, there are some known limitations, mainly because there is no trusted execution environment (TEE) which can protect data in use. 
 Intel(R) SGX provides a good TEE solution with remote attestation support, it can be used to establish secure session without leaking any user identity and provides isoloated execution environment to process user's data. Intel(R) SGX SDK and DCAP SW stack provides remote attesation primitive, it also provides key exchange library based on SGX Quote verification. However, Intel(R) SGX SDK's key exchange library doesn't provides full reference for peer-to-peer key exchange. E.g., it only provides library for initiator use, it doesn't provides library for responder user; Intel(R) SGX key exchange library doesn't provide reference how to verify quote. Intel(R) SGX SDK provides a remote attesation sample project, it includes service provider simulation which looks too simple to provide value reference.
 
-# Design strategy:
-------
+# Design strategy
 This library aims to provide a turn-key reference to establish secure channel between two SGX applications running in diffent host machines in internet. We consider below principle when design this library:
 1. This solution guaratees CIA (Confidentiality/Integrity/Authentity) in secure channel. This is achieved by:
-    * Designed a key exchange protocal based on ECDH algorithm, the EC key pairs are generated inside enclave with SGXSSL; in untrusted part, the public are integrity protected;    
-    * SGX ECDSA Quote and Quote verification library (QVL) are used to verify Quote.
-    Note: 
-    * Intel SGX Quote attestation provides a way to verify the peer is running in an SGX enclave instance. ISV may still needs to do further verification about peer enclave's attributes, e.g. checking the enclave eversion, checking the enclave's identity with enclave.MRENCLAVE, etc. We demontrate how to do this and user can easily modify the code to implement their own verification logic.
-    * We provides reference how to verify Intel(R) SGX Quote enclave (QE) and SGX Quote verification enclave (QVE)'s identity. Intel would release new version QE and QvE for new feature update or bug fix, with ISVSVN bumped up. Intel publish qeidentity.json and qveidentity.json in Intel(R) Platform Certificate Server (PCS) which corresponds to latest QE and QvE's identity, user can download and use it to verify QE and QvE so they can decide to trust QE generated Quote (and QvE generated verification report) or not. For more details, you can refer to Intel(R) SGX SDK and DCAP documents. 
+   * Designed a key exchange protocal based on ECDH algorithm, the EC key pairs are generated inside enclave with SGXSSL; in untrusted part, the public are integrity protected;    
+   * SGX ECDSA Quote and Quote verification library (QVL) are used to verify Quote.   
 2. This library aims to wrap implemenation details like secure session establishment and provides user friendly interface. So user just needs to do verfy few lines of code to leverage our implementation in their product.        
+* Note: 
+   * Intel SGX Quote attestation provides a way to verify the peer is running in an SGX enclave instance. ISV may still needs to do further verification about peer enclave's attributes, e.g. checking the enclave eversion, checking the enclave's identity with enclave.MRENCLAVE, etc. We demontrate how to do this and user can easily modify the code to implement their own verification logic.
+   * We provides reference how to verify Intel(R) SGX Quote enclave (QE) and SGX Quote verification enclave (QVE)'s identity. Intel would release new version QE and QvE for new feature update or bug fix, with ISVSVN bumped up. Intel publish qeidentity.json and qveidentity.json in Intel(R) Platform Certificate Server (PCS) which corresponds to latest QE and QvE's identity, user can download and use it to verify QE and QvE so they can decide to trust QE generated Quote (and QvE generated verification report) or not. For more details, you can refer to Intel(R) SGX SDK and DCAP documents. 
 
 # Change Log
-------
 v0.1.0 (2020/06/12)
 * Initial version
 
 # Build Instruction
--------
-Hardware Pre-requirements:
-1. SGX capable hardware platform with Intel(R) SGX Flexible Launch Control support. SGX is enabled in BIOS.
+* Hardware Pre-requirements:
+   SGX capable hardware platform with Intel(R) SGX Flexible Launch Control support. SGX is enabled in BIOS.
 
-Software Pre-requirements:
+* Software Pre-requirements:
 1. To build the project from source code, you need to install Intel(R) SGX SDK, SGX DCAP developer .deb installer (e.g. libsgx-dcap-ql-dev_<version>-bionic1_amd64.deb)
 2. To execute the demo. application, you need to
    * install Intel(R) SGX driver, platform software and Data Center Attestation Primitive (DCAP) SW stack. 
    * install and configure SGX PCCS (platform cert caching service).
    Please refer to related SGX documents to know how to do this.
 
-Supported Operation systems:
-* Ubuntu 16.04 LTS Desktop 64bits
-* Ubuntu 18.04 LTS Desktop 64bits
+* Supported Operation systems:
+  - Ubuntu 16.04 LTS Desktop 64bits
+  - Ubuntu 18.04 LTS Desktop 64bits
 
-# Build steps:
-------
+* Build steps:
 1. in source code root directory, run "make"
 2. when build complete, it would generate two output folders:
    "bin" subfolder - includes demo. application 
@@ -68,11 +61,9 @@ We provide three trusted runtime library to establish secure channel.
 # Demo application description:
 =============================
 ## General Design:
-------
    This applicatin demos the library usage. It shows two enclaves running in different physcial machine can create secure session with our provided library. The two enclaves runs classical ECDH algorithm to negociate shared key in runtime. In this process, the two enclave uses Intel(R) SGX ECDSA Quote to attest its identity to peer, it also uses quote to verify peer's identity. These operations are executed in Intel(R) SGX enclave, which provides trusted execution environment to protect the confidentital data like session key. 
 
 ## Binary Description:
-------
 Once build is completed, you can find output binary in "bin" subfolder, which includes below files:
 * enclaveattest_responder
    This application runs as attestation responder, it creates ECDH secure session with one or mulitple initiators. During secure session establishment,it would generate Intel(R) SGX ECDSA Quote with SGX DCAP software stack and send to initiator, so initiator can attest responder's identity; responder would also verify initiator's identity by verifying initiator's SGX ECDSA Quote. This application supports to create multiple secure sessions with different initiators. This application launches an SGX enclave libsgx_uea_key_exchange_responder.so to perform all needed confidential operation, e.g. in ECDH algorim, private key generation and shared key derivation are computed inside enclave.
@@ -91,9 +82,7 @@ Once build is completed, you can find output binary in "bin" subfolder, which in
    This is enclave mutual attestation untrusted runtime library for responder role. It loads libenclaveresponder.signed.so, wrapps the ECALL interface and provides interfaces for ISV application (ecnlaveattest_responder in this demo application) to create secure session with initiator.
 
 ## Runtime Logic Description:
-------
 The enclave attesation responder application (enclaveattest_responder) would load enclave (libenclaveresponder.so) to act as attesation responder, it lists on a TCP socket for initiator's request and process according to ECDH algorithm; the enclave attestation initiator application (enclaveattest_initiator) would load enclave (libenclaveinitiator.so) to act as attestation initiator. After secure session is established, initiator application sends a message to responder through secure session, reponder received it and decrypt it through secure session. For demonostration purpose, the responder application prints the plaintext so user can see the message are correctly sent to peer.
 
 # Contract:
-------
 If you have any questions or comments, you can send mail to antoniodanhu@gmail.com.
