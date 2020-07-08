@@ -21,6 +21,9 @@ This library aims to provide a turn-key reference to establish secure channel be
 v0.1.0 (2020/06/12)
 * Initial version
 
+v0.1.1 (2020/07/08)
+* merge pull request to support SGX DCAP 1.7
+
 # Build Instruction
 * Hardware Pre-requirements:
    SGX capable hardware platform with Intel(R) SGX Flexible Launch Control support. SGX is enabled in BIOS.
