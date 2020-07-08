@@ -17,7 +17,7 @@
 
 #include <utility>
 #include "sgx_ql_lib_common.h"
-#include "qve_header.h"
+#include "sgx_qve_header.h"
 #include "sgx_ea.h"
 #include "sgx_eid.h"
 
