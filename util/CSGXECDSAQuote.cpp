@@ -68,6 +68,8 @@ sgx_ea_status_t CSGXECDSAQuote::init_quote()
     att_key_list_size = (uint32_t)sizeof(sgx_ql_att_key_id_list_t) + (uint32_t)sizeof(sgx_att_key_id_ext_t) * att_key_id_num;
     attkeyidlist = (sgx_ql_att_key_id_list_t *)new uint8_t[att_key_list_size];
 
+	memset(attkeyidlist, 0, att_key_list_size);
+
     attkeyidlist->header.num_att_ids = att_key_id_num;
 
     ret = sgx_get_supported_att_key_ids(attkeyidlist->ext_id_list, att_key_id_num);
